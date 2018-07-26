@@ -279,7 +279,7 @@
 		</dependency>
 		<!--page -->
 		<dependency>
-			<groupId>com.kfzx</groupId>
+			<groupId>cn.itcast</groupId>
 			<artifactId>page</artifactId>
 			<version>1.0</version>
 		</dependency>
