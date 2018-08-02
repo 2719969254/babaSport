@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * 条件对象公用对象
- * @author lx
+ * @author
  */
 public class BaseQuery implements Serializable{
 

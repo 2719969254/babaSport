@@ -14,7 +14,7 @@ import com.kfzx.core.query.product.BrandQuery;
 
 /**
  * 品牌事务
- * @author lx
+ * @author
  *
  */
 @Service
@@ -36,30 +36,36 @@ public class BrandServiceImpl implements BrandService{
 		return pagination;
 	}
 
+	@Override
 	public void addBrand(Brand brand) {
 		brandDao.addBrand(brand);
 	}
 
+	@Override
 	public void deleteBrandByKey(Integer id) {
 		brandDao.deleteBrandByKey(id);
 		
 	}
 
+	@Override
 	public void deleteBrandByKeys(Integer[] ids) {
 		brandDao.deleteBrandByKeys(ids);
 		
 	}
 
+	@Override
 	public void updateBrandByKey(Brand brand) {
 		brandDao.updateBrandByKey(brand);
 		
 	}
 
+	@Override
 	public Brand getBrandByKey(Integer id) {
 		// TODO Auto-generated method stub
 		return brandDao.getBrandByKey(id);
 	}
 
+	@Override
 	public List<Brand> getBrandList(BrandQuery brandQuery) {
 		// TODO Auto-generated method stub
 		return brandDao.getBrandList(brandQuery);

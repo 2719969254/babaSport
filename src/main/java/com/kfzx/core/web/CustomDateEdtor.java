@@ -11,11 +11,12 @@ import org.springframework.web.context.request.WebRequest;
 
 /**
  * 日期自定义转换器
- * @author lx
+ * @author
  *
  */
 public class CustomDateEdtor implements WebBindingInitializer {
 
+	@Override
 	public void initBinder(WebDataBinder binder, WebRequest request) {
 		// TODO Auto-generated method stub
 		//转换日期格式

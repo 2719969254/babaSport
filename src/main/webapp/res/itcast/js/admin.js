@@ -13,4 +13,4 @@ Cms.lmenu = function(id) {
 			m.focusElement=this;
 		});
 	});
-}
+};

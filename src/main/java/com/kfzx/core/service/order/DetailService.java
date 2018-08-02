@@ -8,8 +8,7 @@ import com.kfzx.core.query.order.DetailQuery;
 
 /**
  * 
- * @author lixu
- * @Date [2014-3-28 下午01:50:28]
+@author
  */
 public interface DetailService {
 	/**
@@ -17,38 +16,38 @@ public interface DetailService {
 	 * 
 	 * @return
 	 */
-	public Integer addDetail(Detail detail);
+    Integer addDetail(Detail detail);
 
 	/**
 	 * 根据主键查询
 	 */
-	public Detail getDetailByKey(Integer id);
+    Detail getDetailByKey(Integer id);
 
 	/**
 	 * 根据主键批量查询
 	 */
-	public List<Detail> getDetailsByKeys(List<Integer> idList);
+    List<Detail> getDetailsByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKey(Integer id);
+    Integer deleteByKey(Integer id);
 
 	/**
 	 * 根据主键批量删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKeys(List<Integer> idList);
+    Integer deleteByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键更新
 	 * 
 	 * @return
 	 */
-	public Integer updateDetailByKey(Detail detail);
+    Integer updateDetailByKey(Detail detail);
 
 	/**
 	 * 根据条件查询分页查询
@@ -57,7 +56,7 @@ public interface DetailService {
 	 *            查询条件
 	 * @return
 	 */
-	public Pagination getDetailListWithPage(DetailQuery detailQuery);
+    Pagination getDetailListWithPage(DetailQuery detailQuery);
 
 	/**
 	 * 根据条件查询
@@ -66,5 +65,5 @@ public interface DetailService {
 	 *            查询条件
 	 * @return
 	 */
-	public List<Detail> getDetailList(DetailQuery detailQuery);
+    List<Detail> getDetailList(DetailQuery detailQuery);
 }

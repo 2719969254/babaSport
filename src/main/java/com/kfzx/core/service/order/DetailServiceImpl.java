@@ -13,8 +13,7 @@ import com.kfzx.core.dao.order.DetailDao;
 import com.kfzx.core.query.order.DetailQuery;
 /**
  * 订单子项(订单详情)
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional

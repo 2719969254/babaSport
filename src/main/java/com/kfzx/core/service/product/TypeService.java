@@ -8,8 +8,7 @@ import com.kfzx.core.query.product.TypeQuery;
 
 /**
  * 
- * @author lixu
- * @Date [2014-3-28 下午01:50:28]
+@author
  */
 public interface TypeService {
 	/**
@@ -17,38 +16,38 @@ public interface TypeService {
 	 * 
 	 * @return
 	 */
-	public Integer addType(Type type);
+    Integer addType(Type type);
 
 	/**
 	 * 根据主键查询
 	 */
-	public Type getTypeByKey(Integer id);
+    Type getTypeByKey(Integer id);
 
 	/**
 	 * 根据主键批量查询
 	 */
-	public List<Type> getTypesByKeys(List<Integer> idList);
+    List<Type> getTypesByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKey(Integer id);
+    Integer deleteByKey(Integer id);
 
 	/**
 	 * 根据主键批量删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKeys(List<Integer> idList);
+    Integer deleteByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键更新
 	 * 
 	 * @return
 	 */
-	public Integer updateTypeByKey(Type type);
+    Integer updateTypeByKey(Type type);
 
 	/**
 	 * 根据条件查询分页查询
@@ -57,7 +56,7 @@ public interface TypeService {
 	 *            查询条件
 	 * @return
 	 */
-	public Pagination getTypeListWithPage(TypeQuery typeQuery);
+    Pagination getTypeListWithPage(TypeQuery typeQuery);
 
 	/**
 	 * 根据条件查询
@@ -66,5 +65,5 @@ public interface TypeService {
 	 *            查询条件
 	 * @return
 	 */
-	public List<Type> getTypeList(TypeQuery typeQuery);
+    List<Type> getTypeList(TypeQuery typeQuery);
 }

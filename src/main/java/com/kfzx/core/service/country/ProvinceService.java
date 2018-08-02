@@ -8,8 +8,7 @@ import com.kfzx.core.query.country.ProvinceQuery;
 
 /**
  * 
- * @author lixu
- * @Date [2014-3-28 下午01:50:28]
+@author
  */
 public interface ProvinceService {
 	/**
@@ -17,38 +16,38 @@ public interface ProvinceService {
 	 * 
 	 * @return
 	 */
-	public Integer addProvince(Province province);
+    Integer addProvince(Province province);
 
 	/**
 	 * 根据主键查询
 	 */
-	public Province getProvinceByKey(Integer id);
+    Province getProvinceByKey(Integer id);
 
 	/**
 	 * 根据主键批量查询
 	 */
-	public List<Province> getProvincesByKeys(List<Integer> idList);
+    List<Province> getProvincesByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKey(Integer id);
+    Integer deleteByKey(Integer id);
 
 	/**
 	 * 根据主键批量删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKeys(List<Integer> idList);
+    Integer deleteByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键更新
 	 * 
 	 * @return
 	 */
-	public Integer updateProvinceByKey(Province province);
+    Integer updateProvinceByKey(Province province);
 
 	/**
 	 * 根据条件查询分页查询
@@ -57,7 +56,7 @@ public interface ProvinceService {
 	 *            查询条件
 	 * @return
 	 */
-	public Pagination getProvinceListWithPage(ProvinceQuery provinceQuery);
+    Pagination getProvinceListWithPage(ProvinceQuery provinceQuery);
 
 	/**
 	 * 根据条件查询
@@ -66,5 +65,5 @@ public interface ProvinceService {
 	 *            查询条件
 	 * @return
 	 */
-	public List<Province> getProvinceList(ProvinceQuery provinceQuery);
+    List<Province> getProvinceList(ProvinceQuery provinceQuery);
 }

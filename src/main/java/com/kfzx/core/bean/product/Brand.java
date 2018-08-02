@@ -4,7 +4,6 @@ import com.kfzx.core.web.Constants;
 
 /**
  * 品牌
- * @author lx
  *
  */
 public class Brand {

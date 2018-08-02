@@ -4,9 +4,7 @@ import java.util.*;
 import java.io.Serializable;
 
 /**
- * 
- * @author lixu
- * @Date [2014-3-28 下午04:38:53]
+ *
  */
 public class Detail implements Serializable {
 	/**

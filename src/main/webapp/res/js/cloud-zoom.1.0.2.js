@@ -311,7 +311,7 @@
                 // Start processing. 
                 zw.controlLoop();
 
-                return; // Don't return false here otherwise opera will not detect change of the mouse pointer type.
+                 // Don't return false here otherwise opera will not detect change of the mouse pointer type.
             });
         };
 
@@ -361,7 +361,7 @@
                 $(this).bind('click', $(this), function (event) {
                     var data = event.data.data('relOpts');
                     // Destroy the previous zoom
-					$('.cloud-zoom-gallery').each(function(){$(this).removeClass('here');})
+					$('.cloud-zoom-gallery').each(function(){$(this).removeClass('here');});
 					$(this).addClass('here');
                     $('#' + data.useZoom).data('zoom').destroy();
                     // Change the biglink to point to the new big image.

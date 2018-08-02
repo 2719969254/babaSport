@@ -26,7 +26,7 @@ Pn.checkbox = function(name, checked) {
 	$("input[type=checkbox][name=" + name + "]").each(function() {
 		$(this).attr("checked", checked);
 	});
-}
+};
 /**
  * 复选框选中的个数
  * 
@@ -42,7 +42,7 @@ Pn.checkedCount = function(name) {
 		}
 	}
 	return count;
-}
+};
 /**
  * 颜色选择器
  */
@@ -56,16 +56,16 @@ Pn.ColorPicker = function(input) {
 	this.target.after(this.button);
 	this.over = function() {
 		$(this).css("border", "1px solid #000");
-	}
+	};
 	this.out = function() {
 		$(this).css("border", "1px solid #fff");
-	}
+	};
 	this.click = function() {
 		var color = $(this).attr("title");
 		obj.setColor(color);
 		this.isShow = false;
 		obj.picker.hide();
-	}
+	};
 	this.createPicker = function() {
 		var c = ["#FF8080", "#FFFF80", "#80FF80", "#00FF80", "#80FFFF",
 				"#0080FF", "#FF80C0", "#FF80FF", "#FF0000", "#FFFF00",
@@ -103,7 +103,7 @@ Pn.ColorPicker = function(input) {
 		});
 		$(document.body).append(picker);
 		return picker;
-	}
+	};
 	this.setColor = function(color) {
 		obj.target.val(color);
 		if (color == "") {
@@ -117,7 +117,7 @@ Pn.ColorPicker = function(input) {
 			alert("color error: " + color);
 			obj.target.focus().select();
 		}
-	}
+	};
 	this.picker = this.createPicker();
 	this.showPicker = function() {
 		if (!obj.isShow) {
@@ -133,7 +133,7 @@ Pn.ColorPicker = function(input) {
 				}, 200);
 			});
 		}
-	}
+	};
 	this.button.bind("click", obj.showPicker);
 	this.target.bind("blur", function() {
 		obj.setColor(obj.target.val());

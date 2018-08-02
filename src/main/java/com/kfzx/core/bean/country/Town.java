@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 /**
  * 县/区
- * @author lixu
- * @Date [2014-3-28 下午04:38:53]
  */
 public class Town implements Serializable {
 	/**

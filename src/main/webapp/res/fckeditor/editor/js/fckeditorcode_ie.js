@@ -71,39 +71,3102 @@ var FCKStyleCommand=function(){};FCKStyleCommand.prototype={Name:'Style',Execute
 var FCKDialogCommand=function(A,B,C,D,E,F,G,H){this.Name=A;this.Title=B;this.Url=C;this.Width=D;this.Height=E;this.CustomValue=H;this.GetStateFunction=F;this.GetStateParam=G;this.Resizable=false;};FCKDialogCommand.prototype.Execute=function(){FCKDialog.OpenDialog('FCKDialog_'+this.Name,this.Title,this.Url,this.Width,this.Height,this.CustomValue,null,this.Resizable);};FCKDialogCommand.prototype.GetState=function(){if (this.GetStateFunction) return this.GetStateFunction(this.GetStateParam);else return FCK.EditMode==0?0:-1;};var FCKUndefinedCommand=function(){this.Name='Undefined';};FCKUndefinedCommand.prototype.Execute=function(){alert(FCKLang.NotImplemented);};FCKUndefinedCommand.prototype.GetState=function(){return 0;};var FCKFormatBlockCommand=function(){};FCKFormatBlockCommand.prototype={Name:'FormatBlock',Execute:FCKStyleCommand.prototype.Execute,GetState:function(){return FCK.EditorDocument?0:-1;}};var FCKFontNameCommand=function(){};FCKFontNameCommand.prototype={Name:'FontName',Execute:FCKStyleCommand.prototype.Execute,GetState:FCKFormatBlockCommand.prototype.GetState};var FCKFontSizeCommand=function(){};FCKFontSizeCommand.prototype={Name:'FontSize',Execute:FCKStyleCommand.prototype.Execute,GetState:FCKFormatBlockCommand.prototype.GetState};var FCKPreviewCommand=function(){this.Name='Preview';};FCKPreviewCommand.prototype.Execute=function(){FCK.Preview();};FCKPreviewCommand.prototype.GetState=function(){return 0;};var FCKSaveCommand=function(){this.Name='Save';};FCKSaveCommand.prototype.Execute=function(){var A=FCK.GetParentForm();if (typeof(A.onsubmit)=='function'){var B=A.onsubmit();if (B!=null&&B===false) return;};if (typeof(A.submit)=='function') A.submit();else A.submit.click();};FCKSaveCommand.prototype.GetState=function(){return 0;};var FCKNewPageCommand=function(){this.Name='NewPage';};FCKNewPageCommand.prototype.Execute=function(){FCKUndo.SaveUndoStep();FCK.SetData('');FCKUndo.Typing=true;FCK.Focus();};FCKNewPageCommand.prototype.GetState=function(){return 0;};var FCKSourceCommand=function(){this.Name='Source';};FCKSourceCommand.prototype.Execute=function(){if (FCKConfig.SourcePopup){var A=FCKConfig.ScreenWidth*0.65;var B=FCKConfig.ScreenHeight*0.65;FCKDialog.OpenDialog('FCKDialog_Source',FCKLang.Source,'dialog/fck_source.html',A,B,null,null,true);}else FCK.SwitchEditMode();};FCKSourceCommand.prototype.GetState=function(){return (FCK.EditMode==0?0:1);};var FCKUndoCommand=function(){this.Name='Undo';};FCKUndoCommand.prototype.Execute=function(){FCKUndo.Undo();};FCKUndoCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return (FCKUndo.CheckUndoState()?0:-1);};var FCKRedoCommand=function(){this.Name='Redo';};FCKRedoCommand.prototype.Execute=function(){FCKUndo.Redo();};FCKRedoCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return (FCKUndo.CheckRedoState()?0:-1);};var FCKPageBreakCommand=function(){this.Name='PageBreak';};FCKPageBreakCommand.prototype.Execute=function(){FCKUndo.SaveUndoStep();var e=FCK.EditorDocument.createElement('DIV');e.style.pageBreakAfter='always';e.innerHTML='<span style="DISPLAY:none">&nbsp;</span>';var A=FCKDocumentProcessor_CreateFakeImage('FCK__PageBreak',e);var B=new FCKDomRange(FCK.EditorWindow);B.MoveToSelection();var C=B.SplitBlock();B.InsertNode(A);FCK.Events.FireEvent('OnSelectionChange');};FCKPageBreakCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return 0;};var FCKUnlinkCommand=function(){this.Name='Unlink';};FCKUnlinkCommand.prototype.Execute=function(){FCKUndo.SaveUndoStep();if (FCKBrowserInfo.IsGeckoLike){var A=FCK.Selection.MoveToAncestorNode('A');if (A) FCKTools.RemoveOuterTags(A);return;};FCK.ExecuteNamedCommand(this.Name);};FCKUnlinkCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;var A=FCK.GetNamedCommandState(this.Name);if (A==0&&FCK.EditMode==0){var B=FCKSelection.MoveToAncestorNode('A');var C=(B&&B.name.length>0&&B.href.length==0);if (C) A=-1;};return A;};var FCKVisitLinkCommand=function(){this.Name='VisitLink';};FCKVisitLinkCommand.prototype={GetState:function(){if (FCK.EditMode!=0) return -1;var A=FCK.GetNamedCommandState('Unlink');if (A==0){var B=FCKSelection.MoveToAncestorNode('A');if (!B.href) A=-1;};return A;},Execute:function(){var A=FCKSelection.MoveToAncestorNode('A');var B=A.getAttribute('_fcksavedurl')||A.getAttribute('href',2);if (!/:\/\//.test(B)){var C=FCKConfig.BaseHref;var D=FCK.GetInstanceObject('parent');if (!C){C=D.document.location.href;C=C.substring(0,C.lastIndexOf('/')+1);};if (/^\//.test(B)){try{C=C.match(/^.*:\/\/+[^\/]+/)[0];}catch (e){C=D.document.location.protocol+'://'+D.parent.document.location.host;}};B=C+B;};if (!window.open(B,'_blank')) alert(FCKLang.VisitLinkBlocked);}};var FCKSelectAllCommand=function(){this.Name='SelectAll';};FCKSelectAllCommand.prototype.Execute=function(){if (FCK.EditMode==0){FCK.ExecuteNamedCommand('SelectAll');}else{var A=FCK.EditingArea.Textarea;if (FCKBrowserInfo.IsIE){A.createTextRange().execCommand('SelectAll');}else{A.selectionStart=0;A.selectionEnd=A.value.length;};A.focus();}};FCKSelectAllCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return 0;};var FCKPasteCommand=function(){this.Name='Paste';};FCKPasteCommand.prototype={Execute:function(){if (FCKBrowserInfo.IsIE) FCK.Paste();else FCK.ExecuteNamedCommand('Paste');},GetState:function(){if (FCK.EditMode!=0) return -1;return FCK.GetNamedCommandState('Paste');}};var FCKRuleCommand=function(){this.Name='Rule';};FCKRuleCommand.prototype={Execute:function(){FCKUndo.SaveUndoStep();FCK.InsertElement('hr');},GetState:function(){if (FCK.EditMode!=0) return -1;return FCK.GetNamedCommandState('InsertHorizontalRule');}};var FCKCutCopyCommand=function(A){this.Name=A?'Cut':'Copy';};FCKCutCopyCommand.prototype={Execute:function(){var A=false;if (FCKBrowserInfo.IsIE){var B=function(){A=true;};var C='on'+this.Name.toLowerCase();FCK.EditorDocument.body.attachEvent(C,B);FCK.ExecuteNamedCommand(this.Name);FCK.EditorDocument.body.detachEvent(C,B);}else{try{FCK.ExecuteNamedCommand(this.Name);A=true;}catch(e){}};if (!A) alert(FCKLang['PasteError'+this.Name]);},GetState:function(){return FCK.EditMode!=0?-1:FCK.GetNamedCommandState('Cut');}};var FCKAnchorDeleteCommand=function(){this.Name='AnchorDelete';};FCKAnchorDeleteCommand.prototype={Execute:function(){if (FCK.Selection.GetType()=='Control'){FCK.Selection.Delete();}else{var A=FCK.Selection.GetSelectedElement();if (A){if (A.tagName=='IMG'&&A.getAttribute('_fckanchor')) oAnchor=FCK.GetRealElement(A);else A=null;};if (!A){oAnchor=FCK.Selection.MoveToAncestorNode('A');if (oAnchor) FCK.Selection.SelectNode(oAnchor);};if (oAnchor.href.length!=0){oAnchor.removeAttribute('name');if (FCKBrowserInfo.IsIE) oAnchor.className=oAnchor.className.replace(FCKRegexLib.FCK_Class,'');return;};if (A){A.parentNode.removeChild(A);return;};if (oAnchor.innerHTML.length==0){oAnchor.parentNode.removeChild(oAnchor);return;};FCKTools.RemoveOuterTags(oAnchor);};if (FCKBrowserInfo.IsGecko) FCK.Selection.Collapse(true);},GetState:function(){if (FCK.EditMode!=0) return -1;return FCK.GetNamedCommandState('Unlink');}};var FCKDeleteDivCommand=function(){};FCKDeleteDivCommand.prototype={GetState:function(){if (FCK.EditMode!=0) return -1;var A=FCKSelection.GetParentElement();var B=new FCKElementPath(A);return B.BlockLimit&&B.BlockLimit.nodeName.IEquals('div')?0:-1;},Execute:function(){FCKUndo.SaveUndoStep();var A=FCKDomTools.GetSelectedDivContainers();var B=new FCKDomRange(FCK.EditorWindow);B.MoveToSelection();var C=B.CreateBookmark();for (var i=0;i<A.length;i++) FCKDomTools.RemoveNode(A[i],true);B.MoveToBookmark(C);B.Select();}};var FCKNbsp=function(){this.Name='Non Breaking Space';};FCKNbsp.prototype={Execute:function(){FCK.InsertHtml('&nbsp;');},GetState:function(){return (FCK.EditMode!=0?-1:0);}};
 var FCKShowBlockCommand=function(A,B){this.Name=A;if (B!=undefined) this._SavedState=B;else this._SavedState=null;};FCKShowBlockCommand.prototype.Execute=function(){var A=this.GetState();if (A==-1) return;var B=FCK.EditorDocument.body;if (A==1) B.className=B.className.replace(/(^| )FCK__ShowBlocks/g,'');else B.className+=' FCK__ShowBlocks';if (FCKBrowserInfo.IsIE){try{FCK.EditorDocument.selection.createRange().select();}catch (e){}}else{var C=FCK.EditorWindow.getSelection().focusNode;if (C){if (C.nodeType!=1) C=C.parentNode;FCKDomTools.ScrollIntoView(C,false);}};FCK.Events.FireEvent('OnSelectionChange');};FCKShowBlockCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;if (!FCK.EditorDocument) return 0;if (/FCK__ShowBlocks(?:\s|$)/.test(FCK.EditorDocument.body.className)) return 1;return 0;};FCKShowBlockCommand.prototype.SaveState=function(){this._SavedState=this.GetState();};FCKShowBlockCommand.prototype.RestoreState=function(){if (this._SavedState!=null&&this.GetState()!=this._SavedState) this.Execute();};
 var FCKSpellCheckCommand=function(){this.Name='SpellCheck';this.IsEnabled=true;};FCKSpellCheckCommand.prototype.Execute=function(){switch (FCKConfig.SpellChecker){case 'ieSpell':this._RunIeSpell();break;case 'SpellerPages':FCKDialog.OpenDialog('FCKDialog_SpellCheck','Spell Check','dialog/fck_spellerpages.html',440,480);break;case 'WSC':FCKDialog.OpenDialog('FCKDialog_SpellCheck','Spell Check','wsc/w.html',530,480);}};FCKSpellCheckCommand.prototype._RunIeSpell=function(){try{var A=new ActiveXObject("ieSpell.ieSpellExtension");A.CheckAllLinkedDocuments(FCK.EditorDocument);}catch(e){if(e.number==-2146827859){if (confirm(FCKLang.IeSpellDownload)) window.open(FCKConfig.IeSpellDownloadUrl,'IeSpellDownload');}else alert('Error Loading ieSpell: '+e.message+' ('+e.number+')');}};FCKSpellCheckCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return this.IsEnabled?0:-1;};
-var FCKTextColorCommand=function(A){this.Name=A=='ForeColor'?'TextColor':'BGColor';this.Type=A;var B;if (FCKBrowserInfo.IsIE) B=window;else if (FCK.ToolbarSet._IFrame) B=FCKTools.GetElementWindow(FCK.ToolbarSet._IFrame);else B=window.parent;this._Panel=new FCKPanel(B);this._Panel.AppendStyleSheet(FCKConfig.SkinEditorCSS);this._Panel.MainNode.className='FCK_Panel';this._CreatePanelBody(this._Panel.Document,this._Panel.MainNode);FCK.ToolbarSet.ToolbarItems.GetItem(this.Name).RegisterPanel(this._Panel);FCKTools.DisableSelection(this._Panel.Document.body);};FCKTextColorCommand.prototype.Execute=function(A,B,C){this._Panel.Show(A,B,C);};FCKTextColorCommand.prototype.SetColor=function(A){FCKUndo.SaveUndoStep();var B=FCKStyles.GetStyle('_FCK_'+(this.Type=='ForeColor'?'Color':'BackColor'));if (!A||A.length==0) FCK.Styles.RemoveStyle(B);else{B.SetVariable('Color',A);FCKStyles.ApplyStyle(B);};FCKUndo.SaveUndoStep();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');};FCKTextColorCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return 0;};function FCKTextColorCommand_OnMouseOver(){this.className='ColorSelected';};function FCKTextColorCommand_OnMouseOut(){this.className='ColorDeselected';};function FCKTextColorCommand_OnClick(A,B,C){this.className='ColorDeselected';B.SetColor(C);B._Panel.Hide();};function FCKTextColorCommand_AutoOnClick(A,B){this.className='ColorDeselected';B.SetColor('');B._Panel.Hide();};function FCKTextColorCommand_MoreOnClick(A,B){this.className='ColorDeselected';B._Panel.Hide();FCKDialog.OpenDialog('FCKDialog_Color',FCKLang.DlgColorTitle,'dialog/fck_colorselector.html',410,320,FCKTools.Bind(B,B.SetColor));};FCKTextColorCommand.prototype._CreatePanelBody=function(A,B){function CreateSelectionDiv(){var C=A.createElement("DIV");C.className='ColorDeselected';FCKTools.AddEventListenerEx(C,'mouseover',FCKTextColorCommand_OnMouseOver);FCKTools.AddEventListenerEx(C,'mouseout',FCKTextColorCommand_OnMouseOut);return C;};var D=B.appendChild(A.createElement("TABLE"));D.className='ForceBaseFont';D.style.tableLayout='fixed';D.cellPadding=0;D.cellSpacing=0;D.border=0;D.width=150;var E=D.insertRow(-1).insertCell(-1);E.colSpan=8;var C=E.appendChild(CreateSelectionDiv());C.innerHTML='<table cellspacing="0" cellpadding="0" width="100%" border="0">\n			<tr>\n				<td><div class="ColorBoxBorder"><div class="ColorBox" style="background-color: #000000"></div></div></td>\n				<td nowrap width="100%" align="center">'+FCKLang.ColorAutomatic+'</td>\n			</tr>\n		</table>';FCKTools.AddEventListenerEx(C,'click',FCKTextColorCommand_AutoOnClick,this);if (!FCKBrowserInfo.IsIE) C.style.width='96%';var G=FCKConfig.FontColors.toString().split(',');var H=0;while (H<G.length){var I=D.insertRow(-1);for (var i=0;i<8;i++,H++){if (H<G.length){var J=G[H].split('/');var K='#'+J[0];var L=J[1]||K;};C=I.insertCell(-1).appendChild(CreateSelectionDiv());C.innerHTML='<div class="ColorBoxBorder"><div class="ColorBox" style="background-color: '+K+'"></div></div>';if (H>=G.length) C.style.visibility='hidden';else FCKTools.AddEventListenerEx(C,'click',FCKTextColorCommand_OnClick,[this,L]);}};if (FCKConfig.EnableMoreFontColors){E=D.insertRow(-1).insertCell(-1);E.colSpan=8;C=E.appendChild(CreateSelectionDiv());C.innerHTML='<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td nowrap align="center">'+FCKLang.ColorMoreColors+'</td></tr></table>';FCKTools.AddEventListenerEx(C,'click',FCKTextColorCommand_MoreOnClick,this);};if (!FCKBrowserInfo.IsIE) C.style.width='96%';};
+var FCKTextColorCommand = function (A) {
+    this.Name = A == 'ForeColor' ? 'TextColor' : 'BGColor';
+    this.Type = A;
+    var B;
+    if (FCKBrowserInfo.IsIE) B = window; else if (FCK.ToolbarSet._IFrame) B = FCKTools.GetElementWindow(FCK.ToolbarSet._IFrame); else B = window.parent;
+    this._Panel = new FCKPanel(B);
+    this._Panel.AppendStyleSheet(FCKConfig.SkinEditorCSS);
+    this._Panel.MainNode.className = 'FCK_Panel';
+    this._CreatePanelBody(this._Panel.Document, this._Panel.MainNode);
+    FCK.ToolbarSet.ToolbarItems.GetItem(this.Name).RegisterPanel(this._Panel);
+    FCKTools.DisableSelection(this._Panel.Document.body);
+};
+FCKTextColorCommand.prototype.Execute = function (A, B, C) {
+    this._Panel.Show(A, B, C);
+};
+FCKTextColorCommand.prototype.SetColor = function (A) {
+    FCKUndo.SaveUndoStep();
+    var B = FCKStyles.GetStyle('_FCK_' + (this.Type == 'ForeColor' ? 'Color' : 'BackColor'));
+    if (!A || A.length == 0) FCK.Styles.RemoveStyle(B); else {
+        B.SetVariable('Color', A);
+        FCKStyles.ApplyStyle(B);
+    }
+    ;FCKUndo.SaveUndoStep();
+    FCK.Focus();
+    FCK.Events.FireEvent('OnSelectionChange');
+};
+FCKTextColorCommand.prototype.GetState = function () {
+    if (FCK.EditMode != 0) return -1;
+    return 0;
+};
+function FCKTextColorCommand_OnMouseOver() {
+    this.className = 'ColorSelected';
+};
+function FCKTextColorCommand_OnMouseOut() {
+    this.className = 'ColorDeselected';
+};
+function FCKTextColorCommand_OnClick(A, B, C) {
+    this.className = 'ColorDeselected';
+    B.SetColor(C);
+    B._Panel.Hide();
+}
+function FCKTextColorCommand_AutoOnClick(A, B) {
+    this.className = 'ColorDeselected';
+    B.SetColor('');
+    B._Panel.Hide();
+}
+function FCKTextColorCommand_MoreOnClick(A, B) {
+    this.className = 'ColorDeselected';
+    B._Panel.Hide();
+    FCKDialog.OpenDialog('FCKDialog_Color', FCKLang.DlgColorTitle, 'dialog/fck_colorselector.html', 410, 320, FCKTools.Bind(B, B.SetColor));
+}
+FCKTextColorCommand.prototype._CreatePanelBody = function (A, B) {
+    function CreateSelectionDiv() {
+        var C = A.createElement("DIV");
+        C.className = 'ColorDeselected';
+        FCKTools.AddEventListenerEx(C, 'mouseover', FCKTextColorCommand_OnMouseOver);
+        FCKTools.AddEventListenerEx(C, 'mouseout', FCKTextColorCommand_OnMouseOut);
+        return C;
+    }
+    var D = B.appendChild(A.createElement("TABLE"));
+    D.className = 'ForceBaseFont';
+    D.style.tableLayout = 'fixed';
+    D.cellPadding = 0;
+    D.cellSpacing = 0;
+    D.border = 0;
+    D.width = 150;
+    var E = D.insertRow(-1).insertCell(-1);
+    E.colSpan = 8;
+    var C = E.appendChild(CreateSelectionDiv());
+    C.innerHTML = '<table cellspacing="0" cellpadding="0" width="100%" border="0">\n			<tr>\n				<td><div class="ColorBoxBorder"><div class="ColorBox" style="background-color: #000000"></div></div></td>\n				<td nowrap width="100%" align="center">' + FCKLang.ColorAutomatic + '</td>\n			</tr>\n		</table>';
+    FCKTools.AddEventListenerEx(C, 'click', FCKTextColorCommand_AutoOnClick, this);
+    if (!FCKBrowserInfo.IsIE) C.style.width = '96%';
+    var G = FCKConfig.FontColors.toString().split(',');
+    var H = 0;
+    while (H < G.length) {
+        var I = D.insertRow(-1);
+        for (var i = 0; i < 8; i++, H++) {
+            if (H < G.length) {
+                var J = G[H].split('/');
+                var K = '#' + J[0];
+                var L = J[1] || K;
+            }
+            C = I.insertCell(-1).appendChild(CreateSelectionDiv());
+            C.innerHTML = '<div class="ColorBoxBorder"><div class="ColorBox" style="background-color: ' + K + '"></div></div>';
+            if (H >= G.length) C.style.visibility = 'hidden'; else FCKTools.AddEventListenerEx(C, 'click', FCKTextColorCommand_OnClick, [this, L]);
+        }
+    }
+    if (FCKConfig.EnableMoreFontColors) {
+        E = D.insertRow(-1).insertCell(-1);
+        E.colSpan = 8;
+        C = E.appendChild(CreateSelectionDiv());
+        C.innerHTML = '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td nowrap align="center">' + FCKLang.ColorMoreColors + '</td></tr></table>';
+        FCKTools.AddEventListenerEx(C, 'click', FCKTextColorCommand_MoreOnClick, this);
+    }
+    if (!FCKBrowserInfo.IsIE) C.style.width = '96%';
+};
 var FCKPastePlainTextCommand=function(){this.Name='PasteText';};FCKPastePlainTextCommand.prototype.Execute=function(){FCK.PasteAsPlainText();};FCKPastePlainTextCommand.prototype.GetState=function(){if (FCK.EditMode!=0) return -1;return FCK.GetNamedCommandState('Paste');};
 var FCKPasteWordCommand=function(){this.Name='PasteWord';};FCKPasteWordCommand.prototype.Execute=function(){FCK.PasteFromWord();};FCKPasteWordCommand.prototype.GetState=function(){if (FCK.EditMode!=0||FCKConfig.ForcePasteAsPlainText) return -1;else return FCK.GetNamedCommandState('Paste');};
-var FCKTableCommand=function(A){this.Name=A;};FCKTableCommand.prototype.Execute=function(){FCKUndo.SaveUndoStep();if (!FCKBrowserInfo.IsGecko){switch (this.Name){case 'TableMergeRight':return FCKTableHandler.MergeRight();case 'TableMergeDown':return FCKTableHandler.MergeDown();}};switch (this.Name){case 'TableInsertRowAfter':return FCKTableHandler.InsertRow(false);case 'TableInsertRowBefore':return FCKTableHandler.InsertRow(true);case 'TableDeleteRows':return FCKTableHandler.DeleteRows();case 'TableInsertColumnAfter':return FCKTableHandler.InsertColumn(false);case 'TableInsertColumnBefore':return FCKTableHandler.InsertColumn(true);case 'TableDeleteColumns':return FCKTableHandler.DeleteColumns();case 'TableInsertCellAfter':return FCKTableHandler.InsertCell(null,false);case 'TableInsertCellBefore':return FCKTableHandler.InsertCell(null,true);case 'TableDeleteCells':return FCKTableHandler.DeleteCells();case 'TableMergeCells':return FCKTableHandler.MergeCells();case 'TableHorizontalSplitCell':return FCKTableHandler.HorizontalSplitCell();case 'TableVerticalSplitCell':return FCKTableHandler.VerticalSplitCell();case 'TableDelete':return FCKTableHandler.DeleteTable();default:return alert(FCKLang.UnknownCommand.replace(/%1/g,this.Name));}};FCKTableCommand.prototype.GetState=function(){if (FCK.EditorDocument!=null&&FCKSelection.HasAncestorNode('TABLE')){switch (this.Name){case 'TableHorizontalSplitCell':case 'TableVerticalSplitCell':if (FCKTableHandler.GetSelectedCells().length==1) return 0;else return -1;case 'TableMergeCells':if (FCKTableHandler.CheckIsSelectionRectangular()&&FCKTableHandler.GetSelectedCells().length>1) return 0;else return -1;case 'TableMergeRight':return FCKTableHandler.GetMergeRightTarget()?0:-1;case 'TableMergeDown':return FCKTableHandler.GetMergeDownTarget()?0:-1;default:return 0;}}else return -1;};
-var FCKFitWindow=function(){this.Name='FitWindow';};FCKFitWindow.prototype.Execute=function(){var A=window.frameElement;var B=A.style;var C=parent;var D=C.document.documentElement;var E=C.document.body;var F=E.style;var G;var H,oEditorScrollPos;if (FCK.EditMode==0){H=new FCKDomRange(FCK.EditorWindow);H.MoveToSelection();oEditorScrollPos=FCKTools.GetScrollPosition(FCK.EditorWindow);}else{var I=FCK.EditingArea.Textarea;H=!FCKBrowserInfo.IsIE&&[I.selectionStart,I.selectionEnd];oEditorScrollPos=[I.scrollLeft,I.scrollTop];};if (!this.IsMaximized){if(FCKBrowserInfo.IsIE) C.attachEvent('onresize',FCKFitWindow_Resize);else C.addEventListener('resize',FCKFitWindow_Resize,true);this._ScrollPos=FCKTools.GetScrollPosition(C);G=A;while((G=G.parentNode)){if (G.nodeType==1){G._fckSavedStyles=FCKTools.SaveStyles(G);G.style.zIndex=FCKConfig.FloatingPanelsZIndex-1;}};if (FCKBrowserInfo.IsIE){this.documentElementOverflow=D.style.overflow;D.style.overflow='hidden';F.overflow='hidden';}else{F.overflow='hidden';F.width='0px';F.height='0px';};this._EditorFrameStyles=FCKTools.SaveStyles(A);var J=FCKTools.GetViewPaneSize(C);B.position="absolute";A.offsetLeft;B.zIndex=FCKConfig.FloatingPanelsZIndex-1;B.left="0px";B.top="0px";B.width=J.Width+"px";B.height=J.Height+"px";if (!FCKBrowserInfo.IsIE){B.borderRight=B.borderBottom="9999px solid white";B.backgroundColor="white";};C.scrollTo(0,0);var K=FCKTools.GetWindowPosition(C,A);if (K.x!=0) B.left=(-1*K.x)+"px";if (K.y!=0) B.top=(-1*K.y)+"px";this.IsMaximized=true;}else{if(FCKBrowserInfo.IsIE) C.detachEvent("onresize",FCKFitWindow_Resize);else C.removeEventListener("resize",FCKFitWindow_Resize,true);G=A;while((G=G.parentNode)){if (G._fckSavedStyles){FCKTools.RestoreStyles(G,G._fckSavedStyles);G._fckSavedStyles=null;}};if (FCKBrowserInfo.IsIE) D.style.overflow=this.documentElementOverflow;FCKTools.RestoreStyles(A,this._EditorFrameStyles);C.scrollTo(this._ScrollPos.X,this._ScrollPos.Y);this.IsMaximized=false;};FCKToolbarItems.GetItem('FitWindow').RefreshState();if (FCK.EditMode==0) FCK.EditingArea.MakeEditable();FCK.Focus();if (FCK.EditMode==0){H.Select();FCK.EditorWindow.scrollTo(oEditorScrollPos.X,oEditorScrollPos.Y);}else{if (!FCKBrowserInfo.IsIE){I.selectionStart=H[0];I.selectionEnd=H[1];};I.scrollLeft=oEditorScrollPos[0];I.scrollTop=oEditorScrollPos[1];}};FCKFitWindow.prototype.GetState=function(){if (FCKConfig.ToolbarLocation!='In') return -1;else return (this.IsMaximized?1:0);};function FCKFitWindow_Resize(){var A=FCKTools.GetViewPaneSize(parent);var B=window.frameElement.style;B.width=A.Width+'px';B.height=A.Height+'px';};
-var FCKListCommand=function(A,B){this.Name=A;this.TagName=B;};FCKListCommand.prototype={GetState:function(){if (FCK.EditMode!=0||!FCK.EditorWindow) return -1;var A=FCKSelection.GetBoundaryParentElement(true);var B=A;while (B){if (B.nodeName.IEquals(['ul','ol'])) break;B=B.parentNode;};if (B&&B.nodeName.IEquals(this.TagName)) return 1;else return 0;},Execute:function(){FCKUndo.SaveUndoStep();var A=FCK.EditorDocument;var B=new FCKDomRange(FCK.EditorWindow);B.MoveToSelection();var C=this.GetState();if (C==0){FCKDomTools.TrimNode(A.body);if (!A.body.firstChild){var D=A.createElement('p');A.body.appendChild(D);B.MoveToNodeContents(D);}};var E=B.CreateBookmark();var F=[];var G={};var H=new FCKDomRangeIterator(B);var I;H.ForceBrBreak=(C==0);var J=true;var K=null;while (J){while ((I=H.GetNextParagraph())){var L=new FCKElementPath(I);var M=null;var N=false;var O=L.BlockLimit;for (var i=L.Elements.length-1;i>=0;i--){var P=L.Elements[i];if (P.nodeName.IEquals(['ol','ul'])){if (O._FCK_ListGroupObject) O._FCK_ListGroupObject=null;var Q=P._FCK_ListGroupObject;if (Q) Q.contents.push(I);else{Q={ 'root':P,'contents':[I] };F.push(Q);FCKDomTools.SetElementMarker(G,P,'_FCK_ListGroupObject',Q);};N=true;break;}};if (N) continue;var R=O;if (R._FCK_ListGroupObject) R._FCK_ListGroupObject.contents.push(I);else{var Q={ 'root':R,'contents':[I] };FCKDomTools.SetElementMarker(G,R,'_FCK_ListGroupObject',Q);F.push(Q);}};if (FCKBrowserInfo.IsIE) J=false;else{if (K==null){K=[];var T=FCKSelection.GetSelection();if (T&&F.length==0) K.push(T.getRangeAt(0));for (var i=1;T&&i<T.rangeCount;i++) K.push(T.getRangeAt(i));};if (K.length<1) J=false;else{var U=FCKW3CRange.CreateFromRange(A,K.shift());B._Range=U;B._UpdateElementInfo();if (B.StartNode.nodeName.IEquals('td')) B.SetStart(B.StartNode,1);if (B.EndNode.nodeName.IEquals('td')) B.SetEnd(B.EndNode,2);H=new FCKDomRangeIterator(B);H.ForceBrBreak=(C==0);}}};var W=[];while (F.length>0){var Q=F.shift();if (C==0){if (Q.root.nodeName.IEquals(['ul','ol'])) this._ChangeListType(Q,G,W);else this._CreateList(Q,W);}else if (C==1&&Q.root.nodeName.IEquals(['ul','ol'])) this._RemoveList(Q,G);};for (var i=0;i<W.length;i++){var M=W[i];var Z=false;var a=M;while (!Z){a=a.nextSibling;if (a&&a.nodeType==3&&a.nodeValue.search(/^[\n\r\t ]*$/)==0) continue;Z=true;};if (a&&a.nodeName.IEquals(this.TagName)){a.parentNode.removeChild(a);while (a.firstChild) M.appendChild(a.removeChild(a.firstChild));};Z=false;a=M;while (!Z){a=a.previousSibling;if (a&&a.nodeType==3&&a.nodeValue.search(/^[\n\r\t ]*$/)==0) continue;Z=true;};if (a&&a.nodeName.IEquals(this.TagName)){a.parentNode.removeChild(a);while (a.lastChild) M.insertBefore(a.removeChild(a.lastChild),M.firstChild);}};FCKDomTools.ClearAllMarkers(G);B.MoveToBookmark(E);B.Select();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},_ChangeListType:function(A,B,C){var D=FCKDomTools.ListToArray(A.root,B);var E=[];for (var i=0;i<A.contents.length;i++){var F=A.contents[i];F=FCKTools.GetElementAscensor(F,'li');if (!F||F._FCK_ListItem_Processed) continue;E.push(F);FCKDomTools.SetElementMarker(B,F,'_FCK_ListItem_Processed',true);};var G=FCKTools.GetElementDocument(A.root).createElement(this.TagName);for (var i=0;i<E.length;i++){var H=E[i]._FCK_ListArray_Index;D[H].parent=G;};var I=FCKDomTools.ArrayToList(D,B);for (var i=0;i<I.listNode.childNodes.length;i++){if (I.listNode.childNodes[i].nodeName.IEquals(this.TagName)) C.push(I.listNode.childNodes[i]);};A.root.parentNode.replaceChild(I.listNode,A.root);},_CreateList:function(A,B){var C=A.contents;var D=FCKTools.GetElementDocument(A.root);var E=[];if (C.length==1&&C[0]==A.root){var F=D.createElement('div');while (C[0].firstChild) F.appendChild(C[0].removeChild(C[0].firstChild));C[0].appendChild(F);C[0]=F;};var G=A.contents[0].parentNode;for (var i=0;i<C.length;i++) G=FCKDomTools.GetCommonParents(G,C[i].parentNode).pop();for (var i=0;i<C.length;i++){var H=C[i];while (H.parentNode){if (H.parentNode==G){E.push(H);break;};H=H.parentNode;}};if (E.length<1) return;var I=E[E.length-1].nextSibling;var J=D.createElement(this.TagName);B.push(J);while (E.length){var K=E.shift();var L=D.createDocumentFragment();while (K.firstChild) L.appendChild(K.removeChild(K.firstChild));K.parentNode.removeChild(K);var M=D.createElement('li');M.appendChild(L);J.appendChild(M);};G.insertBefore(J,I);},_RemoveList:function(A,B){var C=FCKDomTools.ListToArray(A.root,B);var D=[];for (var i=0;i<A.contents.length;i++){var E=A.contents[i];E=FCKTools.GetElementAscensor(E,'li');if (!E||E._FCK_ListItem_Processed) continue;D.push(E);FCKDomTools.SetElementMarker(B,E,'_FCK_ListItem_Processed',true);};var F=null;for (var i=0;i<D.length;i++){var G=D[i]._FCK_ListArray_Index;C[G].indent=-1;F=G;};for (var i=F+1;i<C.length;i++){if (C[i].indent>C[i-1].indent+1){var H=C[i-1].indent+1-C[i].indent;var I=C[i].indent;while (C[i]&&C[i].indent>=I){C[i].indent+=H;i++;};i--;}};var J=FCKDomTools.ArrayToList(C,B);if (A.root.nextSibling==null||A.root.nextSibling.nodeName.IEquals('br')){if (J.listNode.lastChild.nodeName.IEquals('br')) J.listNode.removeChild(J.listNode.lastChild);};A.root.parentNode.replaceChild(J.listNode,A.root);}};
-var FCKJustifyCommand=function(A){this.AlignValue=A;var B=FCKConfig.ContentLangDirection.toLowerCase();this.IsDefaultAlign=(A=='left'&&B=='ltr')||(A=='right'&&B=='rtl');var C=this._CssClassName=(function(){var D=FCKConfig.JustifyClasses;if (D){switch (A){case 'left':return D[0]||null;case 'center':return D[1]||null;case 'right':return D[2]||null;case 'justify':return D[3]||null;}};return null;})();if (C&&C.length>0) this._CssClassRegex=new RegExp('(?:^|\\s+)'+C+'(?=$|\\s)');};FCKJustifyCommand._GetClassNameRegex=function(){var A=FCKJustifyCommand._ClassRegex;if (A!=undefined) return A;var B=[];var C=FCKConfig.JustifyClasses;if (C){for (var i=0;i<4;i++){var D=C[i];if (D&&D.length>0) B.push(D);}};if (B.length>0) A=new RegExp('(?:^|\\s+)(?:'+B.join('|')+')(?=$|\\s)');else A=null;return FCKJustifyCommand._ClassRegex=A;};FCKJustifyCommand.prototype={Execute:function(){FCKUndo.SaveUndoStep();var A=new FCKDomRange(FCK.EditorWindow);A.MoveToSelection();var B=this.GetState();if (B==-1) return;var C=A.CreateBookmark();var D=this._CssClassName;var E=new FCKDomRangeIterator(A);var F;while ((F=E.GetNextParagraph())){F.removeAttribute('align');if (D){var G=F.className.replace(FCKJustifyCommand._GetClassNameRegex(),'');if (B==0){if (G.length>0) G+=' ';F.className=G+D;}else if (G.length==0) FCKDomTools.RemoveAttribute(F,'class');}else{var H=F.style;if (B==0) H.textAlign=this.AlignValue;else{H.textAlign='';if (H.cssText.length==0) F.removeAttribute('style');}}};A.MoveToBookmark(C);A.Select();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},GetState:function(){if (FCK.EditMode!=0||!FCK.EditorWindow) return -1;var A=new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));var B=A.Block||A.BlockLimit;if (!B||B.nodeName.toLowerCase()=='body') return 0;var C;if (FCKBrowserInfo.IsIE) C=B.currentStyle.textAlign;else C=FCK.EditorWindow.getComputedStyle(B,'').getPropertyValue('text-align');C=C.replace(/(-moz-|-webkit-|start|auto)/i,'');if ((!C&&this.IsDefaultAlign)||C==this.AlignValue) return 1;return 0;}};
-var FCKIndentCommand=function(A,B){this.Name=A;this.Offset=B;this.IndentCSSProperty=FCKConfig.ContentLangDirection.IEquals('ltr')?'marginLeft':'marginRight';};FCKIndentCommand._InitIndentModeParameters=function(){if (FCKConfig.IndentClasses&&FCKConfig.IndentClasses.length>0){this._UseIndentClasses=true;this._IndentClassMap={};for (var i=0;i<FCKConfig.IndentClasses.length;i++) this._IndentClassMap[FCKConfig.IndentClasses[i]]=i+1;this._ClassNameRegex=new RegExp('(?:^|\\s+)('+FCKConfig.IndentClasses.join('|')+')(?=$|\\s)');}else this._UseIndentClasses=false;};FCKIndentCommand.prototype={Execute:function(){FCKUndo.SaveUndoStep();var A=new FCKDomRange(FCK.EditorWindow);A.MoveToSelection();var B=A.CreateBookmark();var C=FCKDomTools.GetCommonParentNode(A.StartNode||A.StartContainer,A.EndNode||A.EndContainer,['ul','ol']);if (C) this._IndentList(A,C);else this._IndentBlock(A);A.MoveToBookmark(B);A.Select();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},GetState:function(){if (FCK.EditMode!=0||!FCK.EditorWindow) return -1;if (FCKIndentCommand._UseIndentClasses==undefined) FCKIndentCommand._InitIndentModeParameters();var A=FCKSelection.GetBoundaryParentElement(true);var B=FCKSelection.GetBoundaryParentElement(false);var C=FCKDomTools.GetCommonParentNode(A,B,['ul','ol']);if (C){if (this.Name.IEquals('outdent')) return 0;var D=FCKTools.GetElementAscensor(A,'li');if (!D||!D.previousSibling) return -1;return 0;};if (!FCKIndentCommand._UseIndentClasses&&this.Name.IEquals('indent')) return 0;var E=new FCKElementPath(A);var F=E.Block||E.BlockLimit;if (!F) return -1;if (FCKIndentCommand._UseIndentClasses){var G=F.className.match(FCKIndentCommand._ClassNameRegex);var H=0;if (G!=null){G=G[1];H=FCKIndentCommand._IndentClassMap[G];};if ((this.Name=='outdent'&&H==0)||(this.Name=='indent'&&H==FCKConfig.IndentClasses.length)) return -1;return 0;}else{var I=parseInt(F.style[this.IndentCSSProperty],10);if (isNaN(I)) I=0;if (I<=0) return -1;return 0;}},_IndentBlock:function(A){var B=new FCKDomRangeIterator(A);B.EnforceRealBlocks=true;A.Expand('block_contents');var C=FCKDomTools.GetCommonParents(A.StartContainer,A.EndContainer);var D=C[C.length-1];var E;while ((E=B.GetNextParagraph())){if (!(E==D||E.parentNode==D)) continue;if (FCKIndentCommand._UseIndentClasses){var F=E.className.match(FCKIndentCommand._ClassNameRegex);var G=0;if (F!=null){F=F[1];G=FCKIndentCommand._IndentClassMap[F];};if (this.Name.IEquals('outdent')) G--;else if (this.Name.IEquals('indent')) G++;G=Math.min(G,FCKConfig.IndentClasses.length);G=Math.max(G,0);var H=E.className.replace(FCKIndentCommand._ClassNameRegex,'');if (G<1) E.className=H;else E.className=(H.length>0?H+' ':'')+FCKConfig.IndentClasses[G-1];}else{var I=parseInt(E.style[this.IndentCSSProperty],10);if (isNaN(I)) I=0;I+=this.Offset;I=Math.max(I,0);I=Math.ceil(I/this.Offset)*this.Offset;E.style[this.IndentCSSProperty]=I?I+FCKConfig.IndentUnit:'';if (E.getAttribute('style')=='') E.removeAttribute('style');}}},_IndentList:function(A,B){var C=A.StartContainer;var D=A.EndContainer;while (C&&C.parentNode!=B) C=C.parentNode;while (D&&D.parentNode!=B) D=D.parentNode;if (!C||!D) return;var E=C;var F=[];var G=false;while (G==false){if (E==D) G=true;F.push(E);E=E.nextSibling;};if (F.length<1) return;var H=FCKDomTools.GetParents(B);for (var i=0;i<H.length;i++){if (H[i].nodeName.IEquals(['ul','ol'])){B=H[i];break;}};var I=this.Name.IEquals('indent')?1:-1;var J=F[0];var K=F[F.length-1];var L={};var M=FCKDomTools.ListToArray(B,L);var N=M[K._FCK_ListArray_Index].indent;for (var i=J._FCK_ListArray_Index;i<=K._FCK_ListArray_Index;i++) M[i].indent+=I;for (var i=K._FCK_ListArray_Index+1;i<M.length&&M[i].indent>N;i++) M[i].indent+=I;var O=FCKDomTools.ArrayToList(M);if (O) B.parentNode.replaceChild(O.listNode,B);FCKDomTools.ClearAllMarkers(L);}};
-var FCKBlockQuoteCommand=function(){};FCKBlockQuoteCommand.prototype={Execute:function(){FCKUndo.SaveUndoStep();var A=this.GetState();var B=new FCKDomRange(FCK.EditorWindow);B.MoveToSelection();var C=B.CreateBookmark();if (FCKBrowserInfo.IsIE){var D=B.GetBookmarkNode(C,true);var E=B.GetBookmarkNode(C,false);var F;if (D&&D.parentNode.nodeName.IEquals('blockquote')&&!D.previousSibling){F=D;while ((F=F.nextSibling)){if (FCKListsLib.BlockElements[F.nodeName.toLowerCase()]) FCKDomTools.MoveNode(D,F,true);}};if (E&&E.parentNode.nodeName.IEquals('blockquote')&&!E.previousSibling){F=E;while ((F=F.nextSibling)){if (FCKListsLib.BlockElements[F.nodeName.toLowerCase()]){if (F.firstChild==D) FCKDomTools.InsertAfterNode(D,E);else FCKDomTools.MoveNode(E,F,true);}}}};var G=new FCKDomRangeIterator(B);var H;if (A==0){var I=[];while ((H=G.GetNextParagraph())) I.push(H);if (I.length<1){para=B.Window.document.createElement(FCKConfig.EnterMode.IEquals('p')?'p':'div');B.InsertNode(para);para.appendChild(B.Window.document.createTextNode('\ufeff'));B.MoveToBookmark(C);B.MoveToNodeContents(para);B.Collapse(true);C=B.CreateBookmark();I.push(para);};var J=I[0].parentNode;var K=[];for (var i=0;i<I.length;i++){H=I[i];J=FCKDomTools.GetCommonParents(H.parentNode,J).pop();}while (J.nodeName.IEquals('table','tbody','tr','ol','ul')) J=J.parentNode;var L=null;while (I.length>0){H=I.shift();while (H.parentNode!=J) H=H.parentNode;if (H!=L) K.push(H);L=H;}while (K.length>0){H=K.shift();if (H.nodeName.IEquals('blockquote')){var M=FCKTools.GetElementDocument(H).createDocumentFragment();while (H.firstChild){M.appendChild(H.removeChild(H.firstChild));I.push(M.lastChild);};H.parentNode.replaceChild(M,H);}else I.push(H);};var N=B.Window.document.createElement('blockquote');J.insertBefore(N,I[0]);while (I.length>0){H=I.shift();N.appendChild(H);}}else if (A==1){var O=[];var P={};while ((H=G.GetNextParagraph())){var Q=null;var R=null;while (H.parentNode){if (H.parentNode.nodeName.IEquals('blockquote')){Q=H.parentNode;R=H;break;};H=H.parentNode;};if (Q&&R&&!R._fckblockquotemoveout){O.push(R);FCKDomTools.SetElementMarker(P,R,'_fckblockquotemoveout',true);}};FCKDomTools.ClearAllMarkers(P);var S=[];var T=[],P={};var U=function(N){for (var i=0;i<N.childNodes.length;i++){if (FCKListsLib.BlockElements[N.childNodes[i].nodeName.toLowerCase()]) return false;};return true;};while (O.length>0){var W=O.shift();var N=W.parentNode;if (W==W.parentNode.firstChild) N.parentNode.insertBefore(N.removeChild(W),N);else if (W==W.parentNode.lastChild) N.parentNode.insertBefore(N.removeChild(W),N.nextSibling);else FCKDomTools.BreakParent(W,W.parentNode,B);if (!N._fckbqprocessed){T.push(N);FCKDomTools.SetElementMarker(P,N,'_fckbqprocessed',true);};S.push(W);};for (var i=T.length-1;i>=0;i--){var N=T[i];if (U(N)) FCKDomTools.RemoveNode(N);};FCKDomTools.ClearAllMarkers(P);if (FCKConfig.EnterMode.IEquals('br')){while (S.length){var W=S.shift();var a=true;if (W.nodeName.IEquals('div')){var M=FCKTools.GetElementDocument(W).createDocumentFragment();var c=a&&W.previousSibling&&!FCKListsLib.BlockBoundaries[W.previousSibling.nodeName.toLowerCase()];if (a&&c) M.appendChild(FCKTools.GetElementDocument(W).createElement('br'));var d=W.nextSibling&&!FCKListsLib.BlockBoundaries[W.nextSibling.nodeName.toLowerCase()];while (W.firstChild) M.appendChild(W.removeChild(W.firstChild));if (d) M.appendChild(FCKTools.GetElementDocument(W).createElement('br'));W.parentNode.replaceChild(M,W);a=false;}}}};B.MoveToBookmark(C);B.Select();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},GetState:function(){if (FCK.EditMode!=0||!FCK.EditorWindow) return -1;var A=new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));var B=A.Block||A.BlockLimit;if (!B||B.nodeName.toLowerCase()=='body') return 0;for (var i=0;i<A.Elements.length;i++){if (A.Elements[i].nodeName.IEquals('blockquote')) return 1;};return 0;}};
+var FCKTableCommand = function (A) {
+    this.Name = A;
+};
+FCKTableCommand.prototype.Execute = function () {
+    FCKUndo.SaveUndoStep();
+    if (!FCKBrowserInfo.IsGecko) {
+        switch (this.Name) {
+            case 'TableMergeRight':
+                return FCKTableHandler.MergeRight();
+            case 'TableMergeDown':
+                return FCKTableHandler.MergeDown();
+        }
+    }
+    switch (this.Name) {
+        case 'TableInsertRowAfter':
+            return FCKTableHandler.InsertRow(false);
+        case 'TableInsertRowBefore':
+            return FCKTableHandler.InsertRow(true);
+        case 'TableDeleteRows':
+            return FCKTableHandler.DeleteRows();
+        case 'TableInsertColumnAfter':
+            return FCKTableHandler.InsertColumn(false);
+        case 'TableInsertColumnBefore':
+            return FCKTableHandler.InsertColumn(true);
+        case 'TableDeleteColumns':
+            return FCKTableHandler.DeleteColumns();
+        case 'TableInsertCellAfter':
+            return FCKTableHandler.InsertCell(null, false);
+        case 'TableInsertCellBefore':
+            return FCKTableHandler.InsertCell(null, true);
+        case 'TableDeleteCells':
+            return FCKTableHandler.DeleteCells();
+        case 'TableMergeCells':
+            return FCKTableHandler.MergeCells();
+        case 'TableHorizontalSplitCell':
+            return FCKTableHandler.HorizontalSplitCell();
+        case 'TableVerticalSplitCell':
+            return FCKTableHandler.VerticalSplitCell();
+        case 'TableDelete':
+            return FCKTableHandler.DeleteTable();
+        default:
+            return alert(FCKLang.UnknownCommand.replace(/%1/g, this.Name));
+    }
+};
+FCKTableCommand.prototype.GetState = function () {
+    if (FCK.EditorDocument != null && FCKSelection.HasAncestorNode('TABLE')) {
+        switch (this.Name) {
+            case 'TableHorizontalSplitCell':
+            case 'TableVerticalSplitCell':
+                if (FCKTableHandler.GetSelectedCells().length == 1) return 0; else return -1;
+            case 'TableMergeCells':
+                if (FCKTableHandler.CheckIsSelectionRectangular() && FCKTableHandler.GetSelectedCells().length > 1) return 0; else return -1;
+            case 'TableMergeRight':
+                return FCKTableHandler.GetMergeRightTarget() ? 0 : -1;
+            case 'TableMergeDown':
+                return FCKTableHandler.GetMergeDownTarget() ? 0 : -1;
+            default:
+                return 0;
+        }
+    } else return -1;
+};
+var FCKFitWindow = function () {
+    this.Name = 'FitWindow';
+};
+FCKFitWindow.prototype.Execute = function () {
+    var A = window.frameElement;
+    var B = A.style;
+    var C = parent;
+    var D = C.document.documentElement;
+    var E = C.document.body;
+    var F = E.style;
+    var G;
+    var H, oEditorScrollPos;
+    if (FCK.EditMode == 0) {
+        H = new FCKDomRange(FCK.EditorWindow);
+        H.MoveToSelection();
+        oEditorScrollPos = FCKTools.GetScrollPosition(FCK.EditorWindow);
+    } else {
+        var I = FCK.EditingArea.Textarea;
+        H = !FCKBrowserInfo.IsIE && [I.selectionStart, I.selectionEnd];
+        oEditorScrollPos = [I.scrollLeft, I.scrollTop];
+    }
+    if (!this.IsMaximized) {
+        if (FCKBrowserInfo.IsIE) C.attachEvent('onresize', FCKFitWindow_Resize); else C.addEventListener('resize', FCKFitWindow_Resize, true);
+        this._ScrollPos = FCKTools.GetScrollPosition(C);
+        G = A;
+        while ((G = G.parentNode)) {
+            if (G.nodeType == 1) {
+                G._fckSavedStyles = FCKTools.SaveStyles(G);
+                G.style.zIndex = FCKConfig.FloatingPanelsZIndex - 1;
+            }
+        }
+        if (FCKBrowserInfo.IsIE) {
+            this.documentElementOverflow = D.style.overflow;
+            D.style.overflow = 'hidden';
+            F.overflow = 'hidden';
+        } else {
+            F.overflow = 'hidden';
+            F.width = '0px';
+            F.height = '0px';
+        }
+        this._EditorFrameStyles = FCKTools.SaveStyles(A);
+        var J = FCKTools.GetViewPaneSize(C);
+        B.position = "absolute";
+        A.offsetLeft;
+        B.zIndex = FCKConfig.FloatingPanelsZIndex - 1;
+        B.left = "0px";
+        B.top = "0px";
+        B.width = J.Width + "px";
+        B.height = J.Height + "px";
+        if (!FCKBrowserInfo.IsIE) {
+            B.borderRight = B.borderBottom = "9999px solid white";
+            B.backgroundColor = "white";
+        }
+        C.scrollTo(0, 0);
+        var K = FCKTools.GetWindowPosition(C, A);
+        if (K.x != 0) B.left = (-1 * K.x) + "px";
+        if (K.y != 0) B.top = (-1 * K.y) + "px";
+        this.IsMaximized = true;
+    } else {
+        if (FCKBrowserInfo.IsIE) C.detachEvent("onresize", FCKFitWindow_Resize); else C.removeEventListener("resize", FCKFitWindow_Resize, true);
+        G = A;
+        while ((G = G.parentNode)) {
+            if (G._fckSavedStyles) {
+                FCKTools.RestoreStyles(G, G._fckSavedStyles);
+                G._fckSavedStyles = null;
+            }
+        }
+        if (FCKBrowserInfo.IsIE) D.style.overflow = this.documentElementOverflow;
+        FCKTools.RestoreStyles(A, this._EditorFrameStyles);
+        C.scrollTo(this._ScrollPos.X, this._ScrollPos.Y);
+        this.IsMaximized = false;
+    }
+    FCKToolbarItems.GetItem('FitWindow').RefreshState();
+    if (FCK.EditMode == 0) FCK.EditingArea.MakeEditable();
+    FCK.Focus();
+    if (FCK.EditMode == 0) {
+        H.Select();
+        FCK.EditorWindow.scrollTo(oEditorScrollPos.X, oEditorScrollPos.Y);
+    } else {
+        if (!FCKBrowserInfo.IsIE) {
+            I.selectionStart = H[0];
+            I.selectionEnd = H[1];
+        }
+        I.scrollLeft = oEditorScrollPos[0];
+        I.scrollTop = oEditorScrollPos[1];
+    }
+};
+FCKFitWindow.prototype.GetState = function () {
+    if (FCKConfig.ToolbarLocation != 'In') return -1; else return (this.IsMaximized ? 1 : 0);
+};
+function FCKFitWindow_Resize() {
+    var A = FCKTools.GetViewPaneSize(parent);
+    var B = window.frameElement.style;
+    B.width = A.Width + 'px';
+    B.height = A.Height + 'px';
+}
+var FCKListCommand = function (A, B) {
+    this.Name = A;
+    this.TagName = B;
+};
+FCKListCommand.prototype = {
+    GetState: function () {
+        if (FCK.EditMode != 0 || !FCK.EditorWindow) return -1;
+        var A = FCKSelection.GetBoundaryParentElement(true);
+        var B = A;
+        while (B) {
+            if (B.nodeName.IEquals(['ul', 'ol'])) break;
+            B = B.parentNode;
+        }
+        if (B && B.nodeName.IEquals(this.TagName)) return 1; else return 0;
+    }, Execute: function () {
+        FCKUndo.SaveUndoStep();
+        var A = FCK.EditorDocument;
+        var B = new FCKDomRange(FCK.EditorWindow);
+        B.MoveToSelection();
+        var C = this.GetState();
+        if (C == 0) {
+            FCKDomTools.TrimNode(A.body);
+            if (!A.body.firstChild) {
+                var D = A.createElement('p');
+                A.body.appendChild(D);
+                B.MoveToNodeContents(D);
+            }
+        }
+        var E = B.CreateBookmark();
+        var F = [];
+        var G = {};
+        var H = new FCKDomRangeIterator(B);
+        var I;
+        H.ForceBrBreak = (C == 0);
+        var J = true;
+        var K = null;
+        while (J) {
+            while ((I = H.GetNextParagraph())) {
+                var L = new FCKElementPath(I);
+                var M = null;
+                var N = false;
+                var O = L.BlockLimit;
+                for (var i = L.Elements.length - 1; i >= 0; i--) {
+                    var P = L.Elements[i];
+                    if (P.nodeName.IEquals(['ol', 'ul'])) {
+                        if (O._FCK_ListGroupObject) O._FCK_ListGroupObject = null;
+                        var Q = P._FCK_ListGroupObject;
+                        if (Q) Q.contents.push(I); else {
+                            Q = {'root': P, 'contents': [I]};
+                            F.push(Q);
+                            FCKDomTools.SetElementMarker(G, P, '_FCK_ListGroupObject', Q);
+                        }
+                        N = true;
+                        break;
+                    }
+                }
+                if (N) continue;
+                var R = O;
+                if (R._FCK_ListGroupObject) R._FCK_ListGroupObject.contents.push(I); else {
+                    var Q = {'root': R, 'contents': [I]};
+                    FCKDomTools.SetElementMarker(G, R, '_FCK_ListGroupObject', Q);
+                    F.push(Q);
+                }
+            }
+            if (FCKBrowserInfo.IsIE) J = false; else {
+                if (K == null) {
+                    K = [];
+                    var T = FCKSelection.GetSelection();
+                    if (T && F.length == 0) K.push(T.getRangeAt(0));
+                    for (var i = 1; T && i < T.rangeCount; i++) K.push(T.getRangeAt(i));
+                }
+                if (K.length < 1) J = false; else {
+                    var U = FCKW3CRange.CreateFromRange(A, K.shift());
+                    B._Range = U;
+                    B._UpdateElementInfo();
+                    if (B.StartNode.nodeName.IEquals('td')) B.SetStart(B.StartNode, 1);
+                    if (B.EndNode.nodeName.IEquals('td')) B.SetEnd(B.EndNode, 2);
+                    H = new FCKDomRangeIterator(B);
+                    H.ForceBrBreak = (C == 0);
+                }
+            }
+        }
+        var W = [];
+        while (F.length > 0) {
+            var Q = F.shift();
+            if (C == 0) {
+                if (Q.root.nodeName.IEquals(['ul', 'ol'])) this._ChangeListType(Q, G, W); else this._CreateList(Q, W);
+            } else if (C == 1 && Q.root.nodeName.IEquals(['ul', 'ol'])) this._RemoveList(Q, G);
+        }
+        for (var i = 0; i < W.length; i++) {
+            var M = W[i];
+            var Z = false;
+            var a = M;
+            while (!Z) {
+                a = a.nextSibling;
+                if (a && a.nodeType == 3 && a.nodeValue.search(/^[\n\r\t ]*$/) == 0) continue;
+                Z = true;
+            }
+            if (a && a.nodeName.IEquals(this.TagName)) {
+                a.parentNode.removeChild(a);
+                while (a.firstChild) M.appendChild(a.removeChild(a.firstChild));
+            }
+            Z = false;
+            a = M;
+            while (!Z) {
+                a = a.previousSibling;
+                if (a && a.nodeType == 3 && a.nodeValue.search(/^[\n\r\t ]*$/) == 0) continue;
+                Z = true;
+            }
+            if (a && a.nodeName.IEquals(this.TagName)) {
+                a.parentNode.removeChild(a);
+                while (a.lastChild) M.insertBefore(a.removeChild(a.lastChild), M.firstChild);
+            }
+        }
+        FCKDomTools.ClearAllMarkers(G);
+        B.MoveToBookmark(E);
+        B.Select();
+        FCK.Focus();
+        FCK.Events.FireEvent('OnSelectionChange');
+    }, _ChangeListType: function (A, B, C) {
+        var D = FCKDomTools.ListToArray(A.root, B);
+        var E = [];
+        for (var i = 0; i < A.contents.length; i++) {
+            var F = A.contents[i];
+            F = FCKTools.GetElementAscensor(F, 'li');
+            if (!F || F._FCK_ListItem_Processed) continue;
+            E.push(F);
+            FCKDomTools.SetElementMarker(B, F, '_FCK_ListItem_Processed', true);
+        }
+        var G = FCKTools.GetElementDocument(A.root).createElement(this.TagName);
+        for (var i = 0; i < E.length; i++) {
+            var H = E[i]._FCK_ListArray_Index;
+            D[H].parent = G;
+        }
+        var I = FCKDomTools.ArrayToList(D, B);
+        for (var i = 0; i < I.listNode.childNodes.length; i++) {
+            if (I.listNode.childNodes[i].nodeName.IEquals(this.TagName)) C.push(I.listNode.childNodes[i]);
+        }
+        A.root.parentNode.replaceChild(I.listNode, A.root);
+    }, _CreateList: function (A, B) {
+        var C = A.contents;
+        var D = FCKTools.GetElementDocument(A.root);
+        var E = [];
+        if (C.length == 1 && C[0] == A.root) {
+            var F = D.createElement('div');
+            while (C[0].firstChild) F.appendChild(C[0].removeChild(C[0].firstChild));
+            C[0].appendChild(F);
+            C[0] = F;
+        }
+        var G = A.contents[0].parentNode;
+        for (var i = 0; i < C.length; i++) G = FCKDomTools.GetCommonParents(G, C[i].parentNode).pop();
+        for (var i = 0; i < C.length; i++) {
+            var H = C[i];
+            while (H.parentNode) {
+                if (H.parentNode == G) {
+                    E.push(H);
+                    break;
+                }
+                H = H.parentNode;
+            }
+        }
+        if (E.length < 1) return;
+        var I = E[E.length - 1].nextSibling;
+        var J = D.createElement(this.TagName);
+        B.push(J);
+        while (E.length) {
+            var K = E.shift();
+            var L = D.createDocumentFragment();
+            while (K.firstChild) L.appendChild(K.removeChild(K.firstChild));
+            K.parentNode.removeChild(K);
+            var M = D.createElement('li');
+            M.appendChild(L);
+            J.appendChild(M);
+        }
+        G.insertBefore(J, I);
+    }, _RemoveList: function (A, B) {
+        var C = FCKDomTools.ListToArray(A.root, B);
+        var D = [];
+        for (var i = 0; i < A.contents.length; i++) {
+            var E = A.contents[i];
+            E = FCKTools.GetElementAscensor(E, 'li');
+            if (!E || E._FCK_ListItem_Processed) continue;
+            D.push(E);
+            FCKDomTools.SetElementMarker(B, E, '_FCK_ListItem_Processed', true);
+        }
+        var F = null;
+        for (var i = 0; i < D.length; i++) {
+            var G = D[i]._FCK_ListArray_Index;
+            C[G].indent = -1;
+            F = G;
+        }
+        for (var i = F + 1; i < C.length; i++) {
+            if (C[i].indent > C[i - 1].indent + 1) {
+                var H = C[i - 1].indent + 1 - C[i].indent;
+                var I = C[i].indent;
+                while (C[i] && C[i].indent >= I) {
+                    C[i].indent += H;
+                    i++;
+                }
+                i--;
+            }
+        }
+        var J = FCKDomTools.ArrayToList(C, B);
+        if (A.root.nextSibling == null || A.root.nextSibling.nodeName.IEquals('br')) {
+            if (J.listNode.lastChild.nodeName.IEquals('br')) J.listNode.removeChild(J.listNode.lastChild);
+        }
+        A.root.parentNode.replaceChild(J.listNode, A.root);
+    }
+};
+var FCKJustifyCommand = function (A) {
+    this.AlignValue = A;
+    var B = FCKConfig.ContentLangDirection.toLowerCase();
+    this.IsDefaultAlign = (A == 'left' && B == 'ltr') || (A == 'right' && B == 'rtl');
+    var C = this._CssClassName = (function () {
+        var D = FCKConfig.JustifyClasses;
+        if (D) {
+            switch (A) {
+                case 'left':
+                    return D[0] || null;
+                case 'center':
+                    return D[1] || null;
+                case 'right':
+                    return D[2] || null;
+                case 'justify':
+                    return D[3] || null;
+            }
+        }
+        return null;
+    })();
+    if (C && C.length > 0) this._CssClassRegex = new RegExp('(?:^|\\s+)' + C + '(?=$|\\s)');
+};
+FCKJustifyCommand._GetClassNameRegex = function () {
+    var A = FCKJustifyCommand._ClassRegex;
+    if (A != undefined) return A;
+    var B = [];
+    var C = FCKConfig.JustifyClasses;
+    if (C) {
+        for (var i = 0; i < 4; i++) {
+            var D = C[i];
+            if (D && D.length > 0) B.push(D);
+        }
+    }
+    if (B.length > 0) A = new RegExp('(?:^|\\s+)(?:' + B.join('|') + ')(?=$|\\s)'); else A = null;
+    return FCKJustifyCommand._ClassRegex = A;
+};
+FCKJustifyCommand.prototype = {
+    Execute: function () {
+        FCKUndo.SaveUndoStep();
+        var A = new FCKDomRange(FCK.EditorWindow);
+        A.MoveToSelection();
+        var B = this.GetState();
+        if (B == -1) return;
+        var C = A.CreateBookmark();
+        var D = this._CssClassName;
+        var E = new FCKDomRangeIterator(A);
+        var F;
+        while ((F = E.GetNextParagraph())) {
+            F.removeAttribute('align');
+            if (D) {
+                var G = F.className.replace(FCKJustifyCommand._GetClassNameRegex(), '');
+                if (B == 0) {
+                    if (G.length > 0) G += ' ';
+                    F.className = G + D;
+                } else if (G.length == 0) FCKDomTools.RemoveAttribute(F, 'class');
+            } else {
+                var H = F.style;
+                if (B == 0) H.textAlign = this.AlignValue; else {
+                    H.textAlign = '';
+                    if (H.cssText.length == 0) F.removeAttribute('style');
+                }
+            }
+        }
+        A.MoveToBookmark(C);
+        A.Select();
+        FCK.Focus();
+        FCK.Events.FireEvent('OnSelectionChange');
+    }, GetState: function () {
+        if (FCK.EditMode != 0 || !FCK.EditorWindow) return -1;
+        var A = new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));
+        var B = A.Block || A.BlockLimit;
+        if (!B || B.nodeName.toLowerCase() == 'body') return 0;
+        var C;
+        if (FCKBrowserInfo.IsIE) C = B.currentStyle.textAlign; else C = FCK.EditorWindow.getComputedStyle(B, '').getPropertyValue('text-align');
+        C = C.replace(/(-moz-|-webkit-|start|auto)/i, '');
+        if ((!C && this.IsDefaultAlign) || C == this.AlignValue) return 1;
+        return 0;
+    }
+};
+var FCKIndentCommand = function (A, B) {
+    this.Name = A;
+    this.Offset = B;
+    this.IndentCSSProperty = FCKConfig.ContentLangDirection.IEquals('ltr') ? 'marginLeft' : 'marginRight';
+};
+FCKIndentCommand._InitIndentModeParameters = function () {
+    if (FCKConfig.IndentClasses && FCKConfig.IndentClasses.length > 0) {
+        this._UseIndentClasses = true;
+        this._IndentClassMap = {};
+        for (var i = 0; i < FCKConfig.IndentClasses.length; i++) this._IndentClassMap[FCKConfig.IndentClasses[i]] = i + 1;
+        this._ClassNameRegex = new RegExp('(?:^|\\s+)(' + FCKConfig.IndentClasses.join('|') + ')(?=$|\\s)');
+    } else this._UseIndentClasses = false;
+};
+FCKIndentCommand.prototype = {
+    Execute: function () {
+        FCKUndo.SaveUndoStep();
+        var A = new FCKDomRange(FCK.EditorWindow);
+        A.MoveToSelection();
+        var B = A.CreateBookmark();
+        var C = FCKDomTools.GetCommonParentNode(A.StartNode || A.StartContainer, A.EndNode || A.EndContainer, ['ul', 'ol']);
+        if (C) this._IndentList(A, C); else this._IndentBlock(A);
+        A.MoveToBookmark(B);
+        A.Select();
+        FCK.Focus();
+        FCK.Events.FireEvent('OnSelectionChange');
+    }, GetState: function () {
+        if (FCK.EditMode != 0 || !FCK.EditorWindow) return -1;
+        if (FCKIndentCommand._UseIndentClasses == undefined) FCKIndentCommand._InitIndentModeParameters();
+        var A = FCKSelection.GetBoundaryParentElement(true);
+        var B = FCKSelection.GetBoundaryParentElement(false);
+        var C = FCKDomTools.GetCommonParentNode(A, B, ['ul', 'ol']);
+        if (C) {
+            if (this.Name.IEquals('outdent')) return 0;
+            var D = FCKTools.GetElementAscensor(A, 'li');
+            if (!D || !D.previousSibling) return -1;
+            return 0;
+        }
+        if (!FCKIndentCommand._UseIndentClasses && this.Name.IEquals('indent')) return 0;
+        var E = new FCKElementPath(A);
+        var F = E.Block || E.BlockLimit;
+        if (!F) return -1;
+        if (FCKIndentCommand._UseIndentClasses) {
+            var G = F.className.match(FCKIndentCommand._ClassNameRegex);
+            var H = 0;
+            if (G != null) {
+                G = G[1];
+                H = FCKIndentCommand._IndentClassMap[G];
+            }
+            if ((this.Name == 'outdent' && H == 0) || (this.Name == 'indent' && H == FCKConfig.IndentClasses.length)) return -1;
+            return 0;
+        } else {
+            var I = parseInt(F.style[this.IndentCSSProperty], 10);
+            if (isNaN(I)) I = 0;
+            if (I <= 0) return -1;
+            return 0;
+        }
+    }, _IndentBlock: function (A) {
+        var B = new FCKDomRangeIterator(A);
+        B.EnforceRealBlocks = true;
+        A.Expand('block_contents');
+        var C = FCKDomTools.GetCommonParents(A.StartContainer, A.EndContainer);
+        var D = C[C.length - 1];
+        var E;
+        while ((E = B.GetNextParagraph())) {
+            if (!(E == D || E.parentNode == D)) continue;
+            if (FCKIndentCommand._UseIndentClasses) {
+                var F = E.className.match(FCKIndentCommand._ClassNameRegex);
+                var G = 0;
+                if (F != null) {
+                    F = F[1];
+                    G = FCKIndentCommand._IndentClassMap[F];
+                }
+                if (this.Name.IEquals('outdent')) G--; else if (this.Name.IEquals('indent')) G++;
+                G = Math.min(G, FCKConfig.IndentClasses.length);
+                G = Math.max(G, 0);
+                var H = E.className.replace(FCKIndentCommand._ClassNameRegex, '');
+                if (G < 1) E.className = H; else E.className = (H.length > 0 ? H + ' ' : '') + FCKConfig.IndentClasses[G - 1];
+            } else {
+                var I = parseInt(E.style[this.IndentCSSProperty], 10);
+                if (isNaN(I)) I = 0;
+                I += this.Offset;
+                I = Math.max(I, 0);
+                I = Math.ceil(I / this.Offset) * this.Offset;
+                E.style[this.IndentCSSProperty] = I ? I + FCKConfig.IndentUnit : '';
+                if (E.getAttribute('style') == '') E.removeAttribute('style');
+            }
+        }
+    }, _IndentList: function (A, B) {
+        var C = A.StartContainer;
+        var D = A.EndContainer;
+        while (C && C.parentNode != B) C = C.parentNode;
+        while (D && D.parentNode != B) D = D.parentNode;
+        if (!C || !D) return;
+        var E = C;
+        var F = [];
+        var G = false;
+        while (G == false) {
+            if (E == D) G = true;
+            F.push(E);
+            E = E.nextSibling;
+        }
+        if (F.length < 1) return;
+        var H = FCKDomTools.GetParents(B);
+        for (var i = 0; i < H.length; i++) {
+            if (H[i].nodeName.IEquals(['ul', 'ol'])) {
+                B = H[i];
+                break;
+            }
+        }
+        var I = this.Name.IEquals('indent') ? 1 : -1;
+        var J = F[0];
+        var K = F[F.length - 1];
+        var L = {};
+        var M = FCKDomTools.ListToArray(B, L);
+        var N = M[K._FCK_ListArray_Index].indent;
+        for (var i = J._FCK_ListArray_Index; i <= K._FCK_ListArray_Index; i++) M[i].indent += I;
+        for (var i = K._FCK_ListArray_Index + 1; i < M.length && M[i].indent > N; i++) M[i].indent += I;
+        var O = FCKDomTools.ArrayToList(M);
+        if (O) B.parentNode.replaceChild(O.listNode, B);
+        FCKDomTools.ClearAllMarkers(L);
+    }
+};
+var FCKBlockQuoteCommand = function () {
+};
+FCKBlockQuoteCommand.prototype = {
+    Execute: function () {
+        FCKUndo.SaveUndoStep();
+        var A = this.GetState();
+        var B = new FCKDomRange(FCK.EditorWindow);
+        B.MoveToSelection();
+        var C = B.CreateBookmark();
+        if (FCKBrowserInfo.IsIE) {
+            var D = B.GetBookmarkNode(C, true);
+            var E = B.GetBookmarkNode(C, false);
+            var F;
+            if (D && D.parentNode.nodeName.IEquals('blockquote') && !D.previousSibling) {
+                F = D;
+                while ((F = F.nextSibling)) {
+                    if (FCKListsLib.BlockElements[F.nodeName.toLowerCase()]) FCKDomTools.MoveNode(D, F, true);
+                }
+            }
+            if (E && E.parentNode.nodeName.IEquals('blockquote') && !E.previousSibling) {
+                F = E;
+                while ((F = F.nextSibling)) {
+                    if (FCKListsLib.BlockElements[F.nodeName.toLowerCase()]) {
+                        if (F.firstChild == D) FCKDomTools.InsertAfterNode(D, E); else FCKDomTools.MoveNode(E, F, true);
+                    }
+                }
+            }
+        }
+        var G = new FCKDomRangeIterator(B);
+        var H;
+        if (A == 0) {
+            var I = [];
+            while ((H = G.GetNextParagraph())) I.push(H);
+            if (I.length < 1) {
+                para = B.Window.document.createElement(FCKConfig.EnterMode.IEquals('p') ? 'p' : 'div');
+                B.InsertNode(para);
+                para.appendChild(B.Window.document.createTextNode('\ufeff'));
+                B.MoveToBookmark(C);
+                B.MoveToNodeContents(para);
+                B.Collapse(true);
+                C = B.CreateBookmark();
+                I.push(para);
+            }
+            var J = I[0].parentNode;
+            var K = [];
+            for (var i = 0; i < I.length; i++) {
+                H = I[i];
+                J = FCKDomTools.GetCommonParents(H.parentNode, J).pop();
+            }
+            while (J.nodeName.IEquals('table', 'tbody', 'tr', 'ol', 'ul')) J = J.parentNode;
+            var L = null;
+            while (I.length > 0) {
+                H = I.shift();
+                while (H.parentNode != J) H = H.parentNode;
+                if (H != L) K.push(H);
+                L = H;
+            }
+            while (K.length > 0) {
+                H = K.shift();
+                if (H.nodeName.IEquals('blockquote')) {
+                    var M = FCKTools.GetElementDocument(H).createDocumentFragment();
+                    while (H.firstChild) {
+                        M.appendChild(H.removeChild(H.firstChild));
+                        I.push(M.lastChild);
+                    }
+                    H.parentNode.replaceChild(M, H);
+                } else I.push(H);
+            }
+            var N = B.Window.document.createElement('blockquote');
+            J.insertBefore(N, I[0]);
+            while (I.length > 0) {
+                H = I.shift();
+                N.appendChild(H);
+            }
+        } else if (A == 1) {
+            var O = [];
+            var P = {};
+            while ((H = G.GetNextParagraph())) {
+                var Q = null;
+                var R = null;
+                while (H.parentNode) {
+                    if (H.parentNode.nodeName.IEquals('blockquote')) {
+                        Q = H.parentNode;
+                        R = H;
+                        break;
+                    }
+                    H = H.parentNode;
+                }
+                if (Q && R && !R._fckblockquotemoveout) {
+                    O.push(R);
+                    FCKDomTools.SetElementMarker(P, R, '_fckblockquotemoveout', true);
+                }
+            }
+            FCKDomTools.ClearAllMarkers(P);
+            var S = [];
+            var T = [], P = {};
+            var U = function (N) {
+                for (var i = 0; i < N.childNodes.length; i++) {
+                    if (FCKListsLib.BlockElements[N.childNodes[i].nodeName.toLowerCase()]) return false;
+                }
+                return true;
+            };
+            while (O.length > 0) {
+                var W = O.shift();
+                var N = W.parentNode;
+                if (W == W.parentNode.firstChild) N.parentNode.insertBefore(N.removeChild(W), N); else if (W == W.parentNode.lastChild) N.parentNode.insertBefore(N.removeChild(W), N.nextSibling); else FCKDomTools.BreakParent(W, W.parentNode, B);
+                if (!N._fckbqprocessed) {
+                    T.push(N);
+                    FCKDomTools.SetElementMarker(P, N, '_fckbqprocessed', true);
+                }
+                S.push(W);
+            }
+            for (var i = T.length - 1; i >= 0; i--) {
+                var N = T[i];
+                if (U(N)) FCKDomTools.RemoveNode(N);
+            }
+            FCKDomTools.ClearAllMarkers(P);
+            if (FCKConfig.EnterMode.IEquals('br')) {
+                while (S.length) {
+                    var W = S.shift();
+                    var a = true;
+                    if (W.nodeName.IEquals('div')) {
+                        var M = FCKTools.GetElementDocument(W).createDocumentFragment();
+                        var c = a && W.previousSibling && !FCKListsLib.BlockBoundaries[W.previousSibling.nodeName.toLowerCase()];
+                        if (a && c) M.appendChild(FCKTools.GetElementDocument(W).createElement('br'));
+                        var d = W.nextSibling && !FCKListsLib.BlockBoundaries[W.nextSibling.nodeName.toLowerCase()];
+                        while (W.firstChild) M.appendChild(W.removeChild(W.firstChild));
+                        if (d) M.appendChild(FCKTools.GetElementDocument(W).createElement('br'));
+                        W.parentNode.replaceChild(M, W);
+                        a = false;
+                    }
+                }
+            }
+        }
+        B.MoveToBookmark(C);
+        B.Select();
+        FCK.Focus();
+        FCK.Events.FireEvent('OnSelectionChange');
+    }, GetState: function () {
+        if (FCK.EditMode != 0 || !FCK.EditorWindow) return -1;
+        var A = new FCKElementPath(FCKSelection.GetBoundaryParentElement(true));
+        var B = A.Block || A.BlockLimit;
+        if (!B || B.nodeName.toLowerCase() == 'body') return 0;
+        for (var i = 0; i < A.Elements.length; i++) {
+            if (A.Elements[i].nodeName.IEquals('blockquote')) return 1;
+        }
+        return 0;
+    }
+};
 var FCKCoreStyleCommand=function(A){this.Name='CoreStyle';this.StyleName='_FCK_'+A;this.IsActive=false;FCKStyles.AttachStyleStateChange(this.StyleName,this._OnStyleStateChange,this);};FCKCoreStyleCommand.prototype={Execute:function(){FCKUndo.SaveUndoStep();if (this.IsActive) FCKStyles.RemoveStyle(this.StyleName);else FCKStyles.ApplyStyle(this.StyleName);FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},GetState:function(){if (FCK.EditMode!=0) return -1;return this.IsActive?1:0;},_OnStyleStateChange:function(A,B){this.IsActive=B;}};
 var FCKRemoveFormatCommand=function(){this.Name='RemoveFormat';};FCKRemoveFormatCommand.prototype={Execute:function(){FCKStyles.RemoveAll();FCK.Focus();FCK.Events.FireEvent('OnSelectionChange');},GetState:function(){return FCK.EditorWindow?0:-1;}};
-var FCKCommands=FCK.Commands={};FCKCommands.LoadedCommands={};FCKCommands.RegisterCommand=function(A,B){this.LoadedCommands[A]=B;};FCKCommands.GetCommand=function(A){var B=FCKCommands.LoadedCommands[A];if (B) return B;switch (A){case 'Bold':case 'Italic':case 'Underline':case 'StrikeThrough':case 'Subscript':case 'Superscript':B=new FCKCoreStyleCommand(A);break;case 'RemoveFormat':B=new FCKRemoveFormatCommand();break;case 'DocProps':B=new FCKDialogCommand('DocProps',FCKLang.DocProps,'dialog/fck_docprops.html',400,380,FCKCommands.GetFullPageState);break;case 'Templates':B=new FCKDialogCommand('Templates',FCKLang.DlgTemplatesTitle,'dialog/fck_template.html',380,450);break;case 'Link':B=new FCKDialogCommand('Link',FCKLang.DlgLnkWindowTitle,'dialog/fck_link.html',400,300);break;case 'Unlink':B=new FCKUnlinkCommand();break;case 'VisitLink':B=new FCKVisitLinkCommand();break;case 'Anchor':B=new FCKDialogCommand('Anchor',FCKLang.DlgAnchorTitle,'dialog/fck_anchor.html',370,160);break;case 'AnchorDelete':B=new FCKAnchorDeleteCommand();break;case 'BulletedList':B=new FCKDialogCommand('BulletedList',FCKLang.BulletedListProp,'dialog/fck_listprop.html?UL',370,160);break;case 'NumberedList':B=new FCKDialogCommand('NumberedList',FCKLang.NumberedListProp,'dialog/fck_listprop.html?OL',370,160);break;case 'About':B=new FCKDialogCommand('About',FCKLang.About,'dialog/fck_about.html',420,330,function(){ return 0;});break;case 'Find':B=new FCKDialogCommand('Find',FCKLang.DlgFindAndReplaceTitle,'dialog/fck_replace.html',340,230,null,null,'Find');break;case 'Replace':B=new FCKDialogCommand('Replace',FCKLang.DlgFindAndReplaceTitle,'dialog/fck_replace.html',340,230,null,null,'Replace');break;case 'Image':B=new FCKDialogCommand('Image',FCKLang.DlgImgTitle,'dialog/fck_image.html',450,390);break;case 'Flash':B=new FCKDialogCommand('Flash',FCKLang.DlgFlashTitle,'dialog/fck_flash.html',450,390);break;case 'SpecialChar':B=new FCKDialogCommand('SpecialChar',FCKLang.DlgSpecialCharTitle,'dialog/fck_specialchar.html',400,290);break;case 'Smiley':B=new FCKDialogCommand('Smiley',FCKLang.DlgSmileyTitle,'dialog/fck_smiley.html',FCKConfig.SmileyWindowWidth,FCKConfig.SmileyWindowHeight);break;case 'Table':B=new FCKDialogCommand('Table',FCKLang.DlgTableTitle,'dialog/fck_table.html',480,250);break;case 'TableProp':B=new FCKDialogCommand('Table',FCKLang.DlgTableTitle,'dialog/fck_table.html?Parent',480,250);break;case 'TableCellProp':B=new FCKDialogCommand('TableCell',FCKLang.DlgCellTitle,'dialog/fck_tablecell.html',550,240);break;case 'Style':B=new FCKStyleCommand();break;case 'FontName':B=new FCKFontNameCommand();break;case 'FontSize':B=new FCKFontSizeCommand();break;case 'FontFormat':B=new FCKFormatBlockCommand();break;case 'Source':B=new FCKSourceCommand();break;case 'Preview':B=new FCKPreviewCommand();break;case 'Save':B=new FCKSaveCommand();break;case 'NewPage':B=new FCKNewPageCommand();break;case 'PageBreak':B=new FCKPageBreakCommand();break;case 'Rule':B=new FCKRuleCommand();break;case 'Nbsp':B=new FCKNbsp();break;case 'TextColor':B=new FCKTextColorCommand('ForeColor');break;case 'BGColor':B=new FCKTextColorCommand('BackColor');break;case 'Paste':B=new FCKPasteCommand();break;case 'PasteText':B=new FCKPastePlainTextCommand();break;case 'PasteWord':B=new FCKPasteWordCommand();break;case 'JustifyLeft':B=new FCKJustifyCommand('left');break;case 'JustifyCenter':B=new FCKJustifyCommand('center');break;case 'JustifyRight':B=new FCKJustifyCommand('right');break;case 'JustifyFull':B=new FCKJustifyCommand('justify');break;case 'Indent':B=new FCKIndentCommand('indent',FCKConfig.IndentLength);break;case 'Outdent':B=new FCKIndentCommand('outdent',FCKConfig.IndentLength*-1);break;case 'Blockquote':B=new FCKBlockQuoteCommand();break;case 'CreateDiv':B=new FCKDialogCommand('CreateDiv',FCKLang.CreateDiv,'dialog/fck_div.html',380,210,null,null,true);break;case 'EditDiv':B=new FCKDialogCommand('EditDiv',FCKLang.EditDiv,'dialog/fck_div.html',380,210,null,null,false);break;case 'DeleteDiv':B=new FCKDeleteDivCommand();break;case 'TableInsertRowAfter':B=new FCKTableCommand('TableInsertRowAfter');break;case 'TableInsertRowBefore':B=new FCKTableCommand('TableInsertRowBefore');break;case 'TableDeleteRows':B=new FCKTableCommand('TableDeleteRows');break;case 'TableInsertColumnAfter':B=new FCKTableCommand('TableInsertColumnAfter');break;case 'TableInsertColumnBefore':B=new FCKTableCommand('TableInsertColumnBefore');break;case 'TableDeleteColumns':B=new FCKTableCommand('TableDeleteColumns');break;case 'TableInsertCellAfter':B=new FCKTableCommand('TableInsertCellAfter');break;case 'TableInsertCellBefore':B=new FCKTableCommand('TableInsertCellBefore');break;case 'TableDeleteCells':B=new FCKTableCommand('TableDeleteCells');break;case 'TableMergeCells':B=new FCKTableCommand('TableMergeCells');break;case 'TableMergeRight':B=new FCKTableCommand('TableMergeRight');break;case 'TableMergeDown':B=new FCKTableCommand('TableMergeDown');break;case 'TableHorizontalSplitCell':B=new FCKTableCommand('TableHorizontalSplitCell');break;case 'TableVerticalSplitCell':B=new FCKTableCommand('TableVerticalSplitCell');break;case 'TableDelete':B=new FCKTableCommand('TableDelete');break;case 'Form':B=new FCKDialogCommand('Form',FCKLang.Form,'dialog/fck_form.html',380,210);break;case 'Checkbox':B=new FCKDialogCommand('Checkbox',FCKLang.Checkbox,'dialog/fck_checkbox.html',380,200);break;case 'Radio':B=new FCKDialogCommand('Radio',FCKLang.RadioButton,'dialog/fck_radiobutton.html',380,200);break;case 'TextField':B=new FCKDialogCommand('TextField',FCKLang.TextField,'dialog/fck_textfield.html',380,210);break;case 'Textarea':B=new FCKDialogCommand('Textarea',FCKLang.Textarea,'dialog/fck_textarea.html',380,210);break;case 'HiddenField':B=new FCKDialogCommand('HiddenField',FCKLang.HiddenField,'dialog/fck_hiddenfield.html',380,190);break;case 'Button':B=new FCKDialogCommand('Button',FCKLang.Button,'dialog/fck_button.html',380,210);break;case 'Select':B=new FCKDialogCommand('Select',FCKLang.SelectionField,'dialog/fck_select.html',400,340);break;case 'ImageButton':B=new FCKDialogCommand('ImageButton',FCKLang.ImageButton,'dialog/fck_image.html?ImageButton',450,390);break;case 'SpellCheck':B=new FCKSpellCheckCommand();break;case 'FitWindow':B=new FCKFitWindow();break;case 'Undo':B=new FCKUndoCommand();break;case 'Redo':B=new FCKRedoCommand();break;case 'Copy':B=new FCKCutCopyCommand(false);break;case 'Cut':B=new FCKCutCopyCommand(true);break;case 'SelectAll':B=new FCKSelectAllCommand();break;case 'InsertOrderedList':B=new FCKListCommand('insertorderedlist','ol');break;case 'InsertUnorderedList':B=new FCKListCommand('insertunorderedlist','ul');break;case 'ShowBlocks':B=new FCKShowBlockCommand('ShowBlocks',FCKConfig.StartupShowBlocks?1:0);break;case 'Undefined':B=new FCKUndefinedCommand();break;default:if (FCKRegexLib.NamedCommands.test(A)) B=new FCKNamedCommand(A);else{alert(FCKLang.UnknownCommand.replace(/%1/g,A));return null;}};FCKCommands.LoadedCommands[A]=B;return B;};FCKCommands.GetFullPageState=function(){return FCKConfig.FullPage?0:-1;};FCKCommands.GetBooleanState=function(A){return A?-1:0;};
-var FCKPanel=function(A){this.IsRTL=(FCKLang.Dir=='rtl');this.IsContextMenu=false;this._LockCounter=0;this._Window=A||window;var B;if (FCKBrowserInfo.IsIE){this._Popup=this._Window.createPopup();var C=this._Window.document;if (FCK_IS_CUSTOM_DOMAIN&&!FCKBrowserInfo.IsIE7){C.domain=FCK_ORIGINAL_DOMAIN;document.domain=FCK_ORIGINAL_DOMAIN;};B=this.Document=this._Popup.document;if (FCK_IS_CUSTOM_DOMAIN){B.domain=FCK_RUNTIME_DOMAIN;C.domain=FCK_RUNTIME_DOMAIN;document.domain=FCK_RUNTIME_DOMAIN;};FCK.IECleanup.AddItem(this,FCKPanel_Cleanup);}else{var D=this._IFrame=this._Window.document.createElement('iframe');FCKTools.ResetStyles(D);D.src='javascript:void(0)';D.allowTransparency=true;D.frameBorder='0';D.scrolling='no';D.style.width=D.style.height='0px';FCKDomTools.SetElementStyles(D,{position:'absolute',zIndex:FCKConfig.FloatingPanelsZIndex});this._Window.document.body.appendChild(D);var E=D.contentWindow;B=this.Document=E.document;var F='';if (FCKBrowserInfo.IsSafari) F='<base href="'+window.document.location+'">';B.open();B.write('<html><head>'+F+'<\/head><body style="margin:0px;padding:0px;"><\/body><\/html>');B.close();if(FCKBrowserInfo.IsAIR) FCKAdobeAIR.Panel_Contructor(B,window.document.location);FCKTools.AddEventListenerEx(E,'focus',FCKPanel_Window_OnFocus,this);FCKTools.AddEventListenerEx(E,'blur',FCKPanel_Window_OnBlur,this);};B.dir=FCKLang.Dir;FCKTools.AddEventListener(B,'contextmenu',FCKTools.CancelEvent);this.MainNode=B.body.appendChild(B.createElement('DIV'));this.MainNode.style.cssFloat=this.IsRTL?'right':'left';};FCKPanel.prototype.AppendStyleSheet=function(A){FCKTools.AppendStyleSheet(this.Document,A);};FCKPanel.prototype.Preload=function(x,y,A){if (this._Popup) this._Popup.show(x,y,0,0,A);};FCKPanel.prototype.ResizeForSubpanel=function(A,B,C){if (!FCKBrowserInfo.IsIE7) return false;if (!this._Popup.isOpen){this.Subpanel=null;return false;};if (B==0&&C==0){if (this.Subpanel!==A) return false;this.Subpanel=null;this.IncreasedX=0;}else{this.Subpanel=A;if ((this.IncreasedX>=B)&&(this.IncreasedY>=C)) return false;this.IncreasedX=Math.max(this.IncreasedX,B);this.IncreasedY=Math.max(this.IncreasedY,C);};var x=this.ShowRect.x;var w=this.IncreasedX;if (this.IsRTL) x=x-w;var D=this.ShowRect.w+w;var E=Math.max(this.ShowRect.h,this.IncreasedY);if (this.ParentPanel) this.ParentPanel.ResizeForSubpanel(this,D,E);this._Popup.show(x,this.ShowRect.y,D,E,this.RelativeElement);return this.IsRTL;};FCKPanel.prototype.Show=function(x,y,A,B,C){var D;var E=this.MainNode;if (this._Popup){this._Popup.show(x,y,0,0,A);FCKDomTools.SetElementStyles(E,{B:B?B+'px':'',C:C?C+'px':''});D=E.offsetWidth;if (FCKBrowserInfo.IsIE7){if (this.ParentPanel&&this.ParentPanel.ResizeForSubpanel(this,D,E.offsetHeight)){FCKTools.RunFunction(this.Show,this,[x,y,A]);return;}};if (this.IsRTL){if (this.IsContextMenu) x=x-D+1;else if (A) x=(x*-1)+A.offsetWidth-D;};if (FCKBrowserInfo.IsIE7){this.ShowRect={x:x,y:y,w:D,h:E.offsetHeight};this.IncreasedX=0;this.IncreasedY=0;this.RelativeElement=A;};this._Popup.show(x,y,D,E.offsetHeight,A);if (this.OnHide){if (this._Timer) CheckPopupOnHide.call(this,true);this._Timer=FCKTools.SetInterval(CheckPopupOnHide,100,this);}}else{if (typeof(FCK.ToolbarSet.CurrentInstance.FocusManager)!='undefined') FCK.ToolbarSet.CurrentInstance.FocusManager.Lock();if (this.ParentPanel){this.ParentPanel.Lock();FCKPanel_Window_OnBlur(null,this.ParentPanel);};if (FCKBrowserInfo.IsGecko&&FCKBrowserInfo.IsMac){this._IFrame.scrolling='';FCKTools.RunFunction(function(){ this._IFrame.scrolling='no';},this);};if (FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel&&FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel!=this) FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel.Hide(false,true);FCKDomTools.SetElementStyles(E,{B:B?B+'px':'',C:C?C+'px':''});D=E.offsetWidth;if (!B)	this._IFrame.width=1;if (!C)	this._IFrame.height=1;D=E.offsetWidth||E.firstChild.offsetWidth;var F=FCKTools.GetDocumentPosition(this._Window,A.nodeType==9?(FCKTools.IsStrictMode(A)?A.documentElement:A.body):A);var G=FCKDomTools.GetPositionedAncestor(this._IFrame.parentNode);if (G){var H=FCKTools.GetDocumentPosition(FCKTools.GetElementWindow(G),G);F.x-=H.x;F.y-=H.y;};if (this.IsRTL&&!this.IsContextMenu) x=(x*-1);x+=F.x;y+=F.y;if (this.IsRTL){if (this.IsContextMenu) x=x-D+1;else if (A) x=x+A.offsetWidth-D;}else{var I=FCKTools.GetViewPaneSize(this._Window);var J=FCKTools.GetScrollPosition(this._Window);var K=I.Height+J.Y;var L=I.Width+J.X;if ((x+D)>L) x-=x+D-L;if ((y+E.offsetHeight)>K) y-=y+E.offsetHeight-K;};FCKDomTools.SetElementStyles(this._IFrame,{left:x+'px',top:y+'px'});this._IFrame.contentWindow.focus();this._IsOpened=true;var M=this;this._resizeTimer=setTimeout(function(){var N=E.offsetWidth||E.firstChild.offsetWidth;var O=E.offsetHeight;M._IFrame.style.width=N+'px';M._IFrame.style.height=O+'px';},0);FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel=this;};FCKTools.RunFunction(this.OnShow,this);};FCKPanel.prototype.Hide=function(A,B){if (this._Popup) this._Popup.hide();else{if (!this._IsOpened||this._LockCounter>0) return;if (typeof(FCKFocusManager)!='undefined'&&!B) FCKFocusManager.Unlock();this._IFrame.style.width=this._IFrame.style.height='0px';this._IsOpened=false;if (this._resizeTimer){clearTimeout(this._resizeTimer);this._resizeTimer=null;};if (this.ParentPanel) this.ParentPanel.Unlock();if (!A) FCKTools.RunFunction(this.OnHide,this);}};FCKPanel.prototype.CheckIsOpened=function(){if (this._Popup) return this._Popup.isOpen;else return this._IsOpened;};FCKPanel.prototype.CreateChildPanel=function(){var A=this._Popup?FCKTools.GetDocumentWindow(this.Document):this._Window;var B=new FCKPanel(A);B.ParentPanel=this;return B;};FCKPanel.prototype.Lock=function(){this._LockCounter++;};FCKPanel.prototype.Unlock=function(){if (--this._LockCounter==0&&!this.HasFocus) this.Hide();};function FCKPanel_Window_OnFocus(e,A){A.HasFocus=true;};function FCKPanel_Window_OnBlur(e,A){A.HasFocus=false;if (A._LockCounter==0) FCKTools.RunFunction(A.Hide,A);};function CheckPopupOnHide(A){if (A||!this._Popup.isOpen){window.clearInterval(this._Timer);this._Timer=null;if (this._Popup&&this.ParentPanel&&!A) this.ParentPanel.ResizeForSubpanel(this,0,0);FCKTools.RunFunction(this.OnHide,this);}};function FCKPanel_Cleanup(){this._Popup=null;this._Window=null;this.Document=null;this.MainNode=null;this.RelativeElement=null;};
-var FCKIcon=function(A){var B=A?typeof(A):'undefined';switch (B){case 'number':this.Path=FCKConfig.SkinPath+'fck_strip.gif';this.Size=16;this.Position=A;break;case 'undefined':this.Path=FCK_SPACER_PATH;break;case 'string':this.Path=A;break;default:this.Path=A[0];this.Size=A[1];this.Position=A[2];}};FCKIcon.prototype.CreateIconElement=function(A){var B,eIconImage;if (this.Position){var C='-'+((this.Position-1)*this.Size)+'px';if (FCKBrowserInfo.IsIE){B=A.createElement('DIV');eIconImage=B.appendChild(A.createElement('IMG'));eIconImage.src=this.Path;eIconImage.style.top=C;}else{B=A.createElement('IMG');B.src=FCK_SPACER_PATH;B.style.backgroundPosition='0px '+C;B.style.backgroundImage='url("'+this.Path+'")';}}else{if (FCKBrowserInfo.IsIE){B=A.createElement('DIV');eIconImage=B.appendChild(A.createElement('IMG'));eIconImage.src=this.Path?this.Path:FCK_SPACER_PATH;}else{B=A.createElement('IMG');B.src=this.Path?this.Path:FCK_SPACER_PATH;}};B.className='TB_Button_Image';return B;};
-var FCKToolbarButtonUI=function(A,B,C,D,E,F){this.Name=A;this.Label=B||A;this.Tooltip=C||this.Label;this.Style=E||0;this.State=F||0;this.Icon=new FCKIcon(D);if (FCK.IECleanup) FCK.IECleanup.AddItem(this,FCKToolbarButtonUI_Cleanup);};FCKToolbarButtonUI.prototype._CreatePaddingElement=function(A){var B=A.createElement('IMG');B.className='TB_Button_Padding';B.src=FCK_SPACER_PATH;return B;};FCKToolbarButtonUI.prototype.Create=function(A){var B=FCKTools.GetElementDocument(A);var C=this.MainElement=B.createElement('DIV');C.title=this.Tooltip;if (FCKBrowserInfo.IsGecko) C.onmousedown=FCKTools.CancelEvent;FCKTools.AddEventListenerEx(C,'mouseover',FCKToolbarButtonUI_OnMouseOver,this);FCKTools.AddEventListenerEx(C,'mouseout',FCKToolbarButtonUI_OnMouseOut,this);FCKTools.AddEventListenerEx(C,'click',FCKToolbarButtonUI_OnClick,this);this.ChangeState(this.State,true);if (this.Style==0&&!this.ShowArrow){C.appendChild(this.Icon.CreateIconElement(B));}else{var D=C.appendChild(B.createElement('TABLE'));D.cellPadding=0;D.cellSpacing=0;var E=D.insertRow(-1);var F=E.insertCell(-1);if (this.Style==0||this.Style==2) F.appendChild(this.Icon.CreateIconElement(B));else F.appendChild(this._CreatePaddingElement(B));if (this.Style==1||this.Style==2){F=E.insertCell(-1);F.className='TB_Button_Text';F.noWrap=true;F.appendChild(B.createTextNode(this.Label));};if (this.ShowArrow){if (this.Style!=0){E.insertCell(-1).appendChild(this._CreatePaddingElement(B));};F=E.insertCell(-1);var G=F.appendChild(B.createElement('IMG'));G.src=FCKConfig.SkinPath+'images/toolbar.buttonarrow.gif';G.width=5;G.height=3;};F=E.insertCell(-1);F.appendChild(this._CreatePaddingElement(B));};A.appendChild(C);};FCKToolbarButtonUI.prototype.ChangeState=function(A,B){if (!B&&this.State==A) return;var e=this.MainElement;if (!e) return;switch (parseInt(A,10)){case 0:e.className='TB_Button_Off';break;case 1:e.className='TB_Button_On';break;case -1:e.className='TB_Button_Disabled';break;};this.State=A;};function FCKToolbarButtonUI_OnMouseOver(A,B){if (B.State==0) this.className='TB_Button_Off_Over';else if (B.State==1) this.className='TB_Button_On_Over';};function FCKToolbarButtonUI_OnMouseOut(A,B){if (B.State==0) this.className='TB_Button_Off';else if (B.State==1) this.className='TB_Button_On';};function FCKToolbarButtonUI_OnClick(A,B){if (B.OnClick&&B.State!=-1) B.OnClick(B);};function FCKToolbarButtonUI_Cleanup(){this.MainElement=null;};
+var FCKCommands = FCK.Commands = {};
+FCKCommands.LoadedCommands = {};
+FCKCommands.RegisterCommand = function (A, B) {
+    this.LoadedCommands[A] = B;
+};
+FCKCommands.GetCommand = function (A) {
+    var B = FCKCommands.LoadedCommands[A];
+    if (B) return B;
+    switch (A) {
+        case 'Bold':
+        case 'Italic':
+        case 'Underline':
+        case 'StrikeThrough':
+        case 'Subscript':
+        case 'Superscript':
+            B = new FCKCoreStyleCommand(A);
+            break;
+        case 'RemoveFormat':
+            B = new FCKRemoveFormatCommand();
+            break;
+        case 'DocProps':
+            B = new FCKDialogCommand('DocProps', FCKLang.DocProps, 'dialog/fck_docprops.html', 400, 380, FCKCommands.GetFullPageState);
+            break;
+        case 'Templates':
+            B = new FCKDialogCommand('Templates', FCKLang.DlgTemplatesTitle, 'dialog/fck_template.html', 380, 450);
+            break;
+        case 'Link':
+            B = new FCKDialogCommand('Link', FCKLang.DlgLnkWindowTitle, 'dialog/fck_link.html', 400, 300);
+            break;
+        case 'Unlink':
+            B = new FCKUnlinkCommand();
+            break;
+        case 'VisitLink':
+            B = new FCKVisitLinkCommand();
+            break;
+        case 'Anchor':
+            B = new FCKDialogCommand('Anchor', FCKLang.DlgAnchorTitle, 'dialog/fck_anchor.html', 370, 160);
+            break;
+        case 'AnchorDelete':
+            B = new FCKAnchorDeleteCommand();
+            break;
+        case 'BulletedList':
+            B = new FCKDialogCommand('BulletedList', FCKLang.BulletedListProp, 'dialog/fck_listprop.html?UL', 370, 160);
+            break;
+        case 'NumberedList':
+            B = new FCKDialogCommand('NumberedList', FCKLang.NumberedListProp, 'dialog/fck_listprop.html?OL', 370, 160);
+            break;
+        case 'About':
+            B = new FCKDialogCommand('About', FCKLang.About, 'dialog/fck_about.html', 420, 330, function () {
+                return 0;
+            });
+            break;
+        case 'Find':
+            B = new FCKDialogCommand('Find', FCKLang.DlgFindAndReplaceTitle, 'dialog/fck_replace.html', 340, 230, null, null, 'Find');
+            break;
+        case 'Replace':
+            B = new FCKDialogCommand('Replace', FCKLang.DlgFindAndReplaceTitle, 'dialog/fck_replace.html', 340, 230, null, null, 'Replace');
+            break;
+        case 'Image':
+            B = new FCKDialogCommand('Image', FCKLang.DlgImgTitle, 'dialog/fck_image.html', 450, 390);
+            break;
+        case 'Flash':
+            B = new FCKDialogCommand('Flash', FCKLang.DlgFlashTitle, 'dialog/fck_flash.html', 450, 390);
+            break;
+        case 'SpecialChar':
+            B = new FCKDialogCommand('SpecialChar', FCKLang.DlgSpecialCharTitle, 'dialog/fck_specialchar.html', 400, 290);
+            break;
+        case 'Smiley':
+            B = new FCKDialogCommand('Smiley', FCKLang.DlgSmileyTitle, 'dialog/fck_smiley.html', FCKConfig.SmileyWindowWidth, FCKConfig.SmileyWindowHeight);
+            break;
+        case 'Table':
+            B = new FCKDialogCommand('Table', FCKLang.DlgTableTitle, 'dialog/fck_table.html', 480, 250);
+            break;
+        case 'TableProp':
+            B = new FCKDialogCommand('Table', FCKLang.DlgTableTitle, 'dialog/fck_table.html?Parent', 480, 250);
+            break;
+        case 'TableCellProp':
+            B = new FCKDialogCommand('TableCell', FCKLang.DlgCellTitle, 'dialog/fck_tablecell.html', 550, 240);
+            break;
+        case 'Style':
+            B = new FCKStyleCommand();
+            break;
+        case 'FontName':
+            B = new FCKFontNameCommand();
+            break;
+        case 'FontSize':
+            B = new FCKFontSizeCommand();
+            break;
+        case 'FontFormat':
+            B = new FCKFormatBlockCommand();
+            break;
+        case 'Source':
+            B = new FCKSourceCommand();
+            break;
+        case 'Preview':
+            B = new FCKPreviewCommand();
+            break;
+        case 'Save':
+            B = new FCKSaveCommand();
+            break;
+        case 'NewPage':
+            B = new FCKNewPageCommand();
+            break;
+        case 'PageBreak':
+            B = new FCKPageBreakCommand();
+            break;
+        case 'Rule':
+            B = new FCKRuleCommand();
+            break;
+        case 'Nbsp':
+            B = new FCKNbsp();
+            break;
+        case 'TextColor':
+            B = new FCKTextColorCommand('ForeColor');
+            break;
+        case 'BGColor':
+            B = new FCKTextColorCommand('BackColor');
+            break;
+        case 'Paste':
+            B = new FCKPasteCommand();
+            break;
+        case 'PasteText':
+            B = new FCKPastePlainTextCommand();
+            break;
+        case 'PasteWord':
+            B = new FCKPasteWordCommand();
+            break;
+        case 'JustifyLeft':
+            B = new FCKJustifyCommand('left');
+            break;
+        case 'JustifyCenter':
+            B = new FCKJustifyCommand('center');
+            break;
+        case 'JustifyRight':
+            B = new FCKJustifyCommand('right');
+            break;
+        case 'JustifyFull':
+            B = new FCKJustifyCommand('justify');
+            break;
+        case 'Indent':
+            B = new FCKIndentCommand('indent', FCKConfig.IndentLength);
+            break;
+        case 'Outdent':
+            B = new FCKIndentCommand('outdent', FCKConfig.IndentLength * -1);
+            break;
+        case 'Blockquote':
+            B = new FCKBlockQuoteCommand();
+            break;
+        case 'CreateDiv':
+            B = new FCKDialogCommand('CreateDiv', FCKLang.CreateDiv, 'dialog/fck_div.html', 380, 210, null, null, true);
+            break;
+        case 'EditDiv':
+            B = new FCKDialogCommand('EditDiv', FCKLang.EditDiv, 'dialog/fck_div.html', 380, 210, null, null, false);
+            break;
+        case 'DeleteDiv':
+            B = new FCKDeleteDivCommand();
+            break;
+        case 'TableInsertRowAfter':
+            B = new FCKTableCommand('TableInsertRowAfter');
+            break;
+        case 'TableInsertRowBefore':
+            B = new FCKTableCommand('TableInsertRowBefore');
+            break;
+        case 'TableDeleteRows':
+            B = new FCKTableCommand('TableDeleteRows');
+            break;
+        case 'TableInsertColumnAfter':
+            B = new FCKTableCommand('TableInsertColumnAfter');
+            break;
+        case 'TableInsertColumnBefore':
+            B = new FCKTableCommand('TableInsertColumnBefore');
+            break;
+        case 'TableDeleteColumns':
+            B = new FCKTableCommand('TableDeleteColumns');
+            break;
+        case 'TableInsertCellAfter':
+            B = new FCKTableCommand('TableInsertCellAfter');
+            break;
+        case 'TableInsertCellBefore':
+            B = new FCKTableCommand('TableInsertCellBefore');
+            break;
+        case 'TableDeleteCells':
+            B = new FCKTableCommand('TableDeleteCells');
+            break;
+        case 'TableMergeCells':
+            B = new FCKTableCommand('TableMergeCells');
+            break;
+        case 'TableMergeRight':
+            B = new FCKTableCommand('TableMergeRight');
+            break;
+        case 'TableMergeDown':
+            B = new FCKTableCommand('TableMergeDown');
+            break;
+        case 'TableHorizontalSplitCell':
+            B = new FCKTableCommand('TableHorizontalSplitCell');
+            break;
+        case 'TableVerticalSplitCell':
+            B = new FCKTableCommand('TableVerticalSplitCell');
+            break;
+        case 'TableDelete':
+            B = new FCKTableCommand('TableDelete');
+            break;
+        case 'Form':
+            B = new FCKDialogCommand('Form', FCKLang.Form, 'dialog/fck_form.html', 380, 210);
+            break;
+        case 'Checkbox':
+            B = new FCKDialogCommand('Checkbox', FCKLang.Checkbox, 'dialog/fck_checkbox.html', 380, 200);
+            break;
+        case 'Radio':
+            B = new FCKDialogCommand('Radio', FCKLang.RadioButton, 'dialog/fck_radiobutton.html', 380, 200);
+            break;
+        case 'TextField':
+            B = new FCKDialogCommand('TextField', FCKLang.TextField, 'dialog/fck_textfield.html', 380, 210);
+            break;
+        case 'Textarea':
+            B = new FCKDialogCommand('Textarea', FCKLang.Textarea, 'dialog/fck_textarea.html', 380, 210);
+            break;
+        case 'HiddenField':
+            B = new FCKDialogCommand('HiddenField', FCKLang.HiddenField, 'dialog/fck_hiddenfield.html', 380, 190);
+            break;
+        case 'Button':
+            B = new FCKDialogCommand('Button', FCKLang.Button, 'dialog/fck_button.html', 380, 210);
+            break;
+        case 'Select':
+            B = new FCKDialogCommand('Select', FCKLang.SelectionField, 'dialog/fck_select.html', 400, 340);
+            break;
+        case 'ImageButton':
+            B = new FCKDialogCommand('ImageButton', FCKLang.ImageButton, 'dialog/fck_image.html?ImageButton', 450, 390);
+            break;
+        case 'SpellCheck':
+            B = new FCKSpellCheckCommand();
+            break;
+        case 'FitWindow':
+            B = new FCKFitWindow();
+            break;
+        case 'Undo':
+            B = new FCKUndoCommand();
+            break;
+        case 'Redo':
+            B = new FCKRedoCommand();
+            break;
+        case 'Copy':
+            B = new FCKCutCopyCommand(false);
+            break;
+        case 'Cut':
+            B = new FCKCutCopyCommand(true);
+            break;
+        case 'SelectAll':
+            B = new FCKSelectAllCommand();
+            break;
+        case 'InsertOrderedList':
+            B = new FCKListCommand('insertorderedlist', 'ol');
+            break;
+        case 'InsertUnorderedList':
+            B = new FCKListCommand('insertunorderedlist', 'ul');
+            break;
+        case 'ShowBlocks':
+            B = new FCKShowBlockCommand('ShowBlocks', FCKConfig.StartupShowBlocks ? 1 : 0);
+            break;
+        case 'Undefined':
+            B = new FCKUndefinedCommand();
+            break;
+        default:
+            if (FCKRegexLib.NamedCommands.test(A)) B = new FCKNamedCommand(A); else {
+                alert(FCKLang.UnknownCommand.replace(/%1/g, A));
+                return null;
+            }
+    }
+    FCKCommands.LoadedCommands[A] = B;
+    return B;
+};
+FCKCommands.GetFullPageState = function () {
+    return FCKConfig.FullPage ? 0 : -1;
+};
+FCKCommands.GetBooleanState = function (A) {
+    return A ? -1 : 0;
+};
+var FCKPanel = function (A) {
+    this.IsRTL = (FCKLang.Dir == 'rtl');
+    this.IsContextMenu = false;
+    this._LockCounter = 0;
+    this._Window = A || window;
+    var B;
+    if (FCKBrowserInfo.IsIE) {
+        this._Popup = this._Window.createPopup();
+        var C = this._Window.document;
+        if (FCK_IS_CUSTOM_DOMAIN && !FCKBrowserInfo.IsIE7) {
+            C.domain = FCK_ORIGINAL_DOMAIN;
+            document.domain = FCK_ORIGINAL_DOMAIN;
+        }
+        B = this.Document = this._Popup.document;
+        if (FCK_IS_CUSTOM_DOMAIN) {
+            B.domain = FCK_RUNTIME_DOMAIN;
+            C.domain = FCK_RUNTIME_DOMAIN;
+            document.domain = FCK_RUNTIME_DOMAIN;
+        }
+        FCK.IECleanup.AddItem(this, FCKPanel_Cleanup);
+    } else {
+        var D = this._IFrame = this._Window.document.createElement('iframe');
+        FCKTools.ResetStyles(D);
+        D.src = 'javascript:void(0)';
+        D.allowTransparency = true;
+        D.frameBorder = '0';
+        D.scrolling = 'no';
+        D.style.width = D.style.height = '0px';
+        FCKDomTools.SetElementStyles(D, {position: 'absolute', zIndex: FCKConfig.FloatingPanelsZIndex});
+        this._Window.document.body.appendChild(D);
+        var E = D.contentWindow;
+        B = this.Document = E.document;
+        var F = '';
+        if (FCKBrowserInfo.IsSafari) F = '<base href="' + window.document.location + '">';
+        B.open();
+        B.write('<html><head>' + F + '<\/head><body style="margin:0px;padding:0px;"><\/body><\/html>');
+        B.close();
+        if (FCKBrowserInfo.IsAIR) FCKAdobeAIR.Panel_Contructor(B, window.document.location);
+        FCKTools.AddEventListenerEx(E, 'focus', FCKPanel_Window_OnFocus, this);
+        FCKTools.AddEventListenerEx(E, 'blur', FCKPanel_Window_OnBlur, this);
+    }
+    B.dir = FCKLang.Dir;
+    FCKTools.AddEventListener(B, 'contextmenu', FCKTools.CancelEvent);
+    this.MainNode = B.body.appendChild(B.createElement('DIV'));
+    this.MainNode.style.cssFloat = this.IsRTL ? 'right' : 'left';
+};
+FCKPanel.prototype.AppendStyleSheet = function (A) {
+    FCKTools.AppendStyleSheet(this.Document, A);
+};
+FCKPanel.prototype.Preload = function (x, y, A) {
+    if (this._Popup) this._Popup.show(x, y, 0, 0, A);
+};
+FCKPanel.prototype.ResizeForSubpanel = function (A, B, C) {
+    if (!FCKBrowserInfo.IsIE7) return false;
+    if (!this._Popup.isOpen) {
+        this.Subpanel = null;
+        return false;
+    }
+    if (B == 0 && C == 0) {
+        if (this.Subpanel !== A) return false;
+        this.Subpanel = null;
+        this.IncreasedX = 0;
+    } else {
+        this.Subpanel = A;
+        if ((this.IncreasedX >= B) && (this.IncreasedY >= C)) return false;
+        this.IncreasedX = Math.max(this.IncreasedX, B);
+        this.IncreasedY = Math.max(this.IncreasedY, C);
+    }
+    var x = this.ShowRect.x;
+    var w = this.IncreasedX;
+    if (this.IsRTL) x = x - w;
+    var D = this.ShowRect.w + w;
+    var E = Math.max(this.ShowRect.h, this.IncreasedY);
+    if (this.ParentPanel) this.ParentPanel.ResizeForSubpanel(this, D, E);
+    this._Popup.show(x, this.ShowRect.y, D, E, this.RelativeElement);
+    return this.IsRTL;
+};
+FCKPanel.prototype.Show = function (x, y, A, B, C) {
+    var D;
+    var E = this.MainNode;
+    if (this._Popup) {
+        this._Popup.show(x, y, 0, 0, A);
+        FCKDomTools.SetElementStyles(E, {B: B ? B + 'px' : '', C: C ? C + 'px' : ''});
+        D = E.offsetWidth;
+        if (FCKBrowserInfo.IsIE7) {
+            if (this.ParentPanel && this.ParentPanel.ResizeForSubpanel(this, D, E.offsetHeight)) {
+                FCKTools.RunFunction(this.Show, this, [x, y, A]);
+                return;
+            }
+        }
+        if (this.IsRTL) {
+            if (this.IsContextMenu) x = x - D + 1; else if (A) x = (x * -1) + A.offsetWidth - D;
+        }
+        if (FCKBrowserInfo.IsIE7) {
+            this.ShowRect = {x: x, y: y, w: D, h: E.offsetHeight};
+            this.IncreasedX = 0;
+            this.IncreasedY = 0;
+            this.RelativeElement = A;
+        }
+        this._Popup.show(x, y, D, E.offsetHeight, A);
+        if (this.OnHide) {
+            if (this._Timer) CheckPopupOnHide.call(this, true);
+            this._Timer = FCKTools.SetInterval(CheckPopupOnHide, 100, this);
+        }
+    } else {
+        if (typeof(FCK.ToolbarSet.CurrentInstance.FocusManager) != 'undefined') FCK.ToolbarSet.CurrentInstance.FocusManager.Lock();
+        if (this.ParentPanel) {
+            this.ParentPanel.Lock();
+            FCKPanel_Window_OnBlur(null, this.ParentPanel);
+        }
+        if (FCKBrowserInfo.IsGecko && FCKBrowserInfo.IsMac) {
+            this._IFrame.scrolling = '';
+            FCKTools.RunFunction(function () {
+                this._IFrame.scrolling = 'no';
+            }, this);
+        }
+        if (FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel && FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel != this) FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel.Hide(false, true);
+        FCKDomTools.SetElementStyles(E, {B: B ? B + 'px' : '', C: C ? C + 'px' : ''});
+        D = E.offsetWidth;
+        if (!B) this._IFrame.width = 1;
+        if (!C) this._IFrame.height = 1;
+        D = E.offsetWidth || E.firstChild.offsetWidth;
+        var F = FCKTools.GetDocumentPosition(this._Window, A.nodeType == 9 ? (FCKTools.IsStrictMode(A) ? A.documentElement : A.body) : A);
+        var G = FCKDomTools.GetPositionedAncestor(this._IFrame.parentNode);
+        if (G) {
+            var H = FCKTools.GetDocumentPosition(FCKTools.GetElementWindow(G), G);
+            F.x -= H.x;
+            F.y -= H.y;
+        }
+        if (this.IsRTL && !this.IsContextMenu) x = (x * -1);
+        x += F.x;
+        y += F.y;
+        if (this.IsRTL) {
+            if (this.IsContextMenu) x = x - D + 1; else if (A) x = x + A.offsetWidth - D;
+        } else {
+            var I = FCKTools.GetViewPaneSize(this._Window);
+            var J = FCKTools.GetScrollPosition(this._Window);
+            var K = I.Height + J.Y;
+            var L = I.Width + J.X;
+            if ((x + D) > L) x -= x + D - L;
+            if ((y + E.offsetHeight) > K) y -= y + E.offsetHeight - K;
+        }
+        FCKDomTools.SetElementStyles(this._IFrame, {left: x + 'px', top: y + 'px'});
+        this._IFrame.contentWindow.focus();
+        this._IsOpened = true;
+        var M = this;
+        this._resizeTimer = setTimeout(function () {
+            var N = E.offsetWidth || E.firstChild.offsetWidth;
+            var O = E.offsetHeight;
+            M._IFrame.style.width = N + 'px';
+            M._IFrame.style.height = O + 'px';
+        }, 0);
+        FCK.ToolbarSet.CurrentInstance.GetInstanceObject('FCKPanel')._OpenedPanel = this;
+    }
+    FCKTools.RunFunction(this.OnShow, this);
+};
+FCKPanel.prototype.Hide = function (A, B) {
+    if (this._Popup) this._Popup.hide(); else {
+        if (!this._IsOpened || this._LockCounter > 0) return;
+        if (typeof(FCKFocusManager) != 'undefined' && !B) FCKFocusManager.Unlock();
+        this._IFrame.style.width = this._IFrame.style.height = '0px';
+        this._IsOpened = false;
+        if (this._resizeTimer) {
+            clearTimeout(this._resizeTimer);
+            this._resizeTimer = null;
+        }
+        if (this.ParentPanel) this.ParentPanel.Unlock();
+        if (!A) FCKTools.RunFunction(this.OnHide, this);
+    }
+};
+FCKPanel.prototype.CheckIsOpened = function () {
+    if (this._Popup) return this._Popup.isOpen; else return this._IsOpened;
+};
+FCKPanel.prototype.CreateChildPanel = function () {
+    var A = this._Popup ? FCKTools.GetDocumentWindow(this.Document) : this._Window;
+    var B = new FCKPanel(A);
+    B.ParentPanel = this;
+    return B;
+};
+FCKPanel.prototype.Lock = function () {
+    this._LockCounter++;
+};
+FCKPanel.prototype.Unlock = function () {
+    if (--this._LockCounter == 0 && !this.HasFocus) this.Hide();
+};
+function FCKPanel_Window_OnFocus(e, A) {
+    A.HasFocus = true;
+}
+function FCKPanel_Window_OnBlur(e, A) {
+    A.HasFocus = false;
+    if (A._LockCounter == 0) FCKTools.RunFunction(A.Hide, A);
+}
+function CheckPopupOnHide(A) {
+    if (A || !this._Popup.isOpen) {
+        window.clearInterval(this._Timer);
+        this._Timer = null;
+        if (this._Popup && this.ParentPanel && !A) this.ParentPanel.ResizeForSubpanel(this, 0, 0);
+        FCKTools.RunFunction(this.OnHide, this);
+    }
+}
+function FCKPanel_Cleanup() {
+    this._Popup = null;
+    this._Window = null;
+    this.Document = null;
+    this.MainNode = null;
+    this.RelativeElement = null;
+}
+var FCKIcon = function (A) {
+    var B = A ? typeof(A) : 'undefined';
+    switch (B) {
+        case 'number':
+            this.Path = FCKConfig.SkinPath + 'fck_strip.gif';
+            this.Size = 16;
+            this.Position = A;
+            break;
+        case 'undefined':
+            this.Path = FCK_SPACER_PATH;
+            break;
+        case 'string':
+            this.Path = A;
+            break;
+        default:
+            this.Path = A[0];
+            this.Size = A[1];
+            this.Position = A[2];
+    }
+};
+FCKIcon.prototype.CreateIconElement = function (A) {
+    var B, eIconImage;
+    if (this.Position) {
+        var C = '-' + ((this.Position - 1) * this.Size) + 'px';
+        if (FCKBrowserInfo.IsIE) {
+            B = A.createElement('DIV');
+            eIconImage = B.appendChild(A.createElement('IMG'));
+            eIconImage.src = this.Path;
+            eIconImage.style.top = C;
+        } else {
+            B = A.createElement('IMG');
+            B.src = FCK_SPACER_PATH;
+            B.style.backgroundPosition = '0px ' + C;
+            B.style.backgroundImage = 'url("' + this.Path + '")';
+        }
+    } else {
+        if (FCKBrowserInfo.IsIE) {
+            B = A.createElement('DIV');
+            eIconImage = B.appendChild(A.createElement('IMG'));
+            eIconImage.src = this.Path ? this.Path : FCK_SPACER_PATH;
+        } else {
+            B = A.createElement('IMG');
+            B.src = this.Path ? this.Path : FCK_SPACER_PATH;
+        }
+    }
+    B.className = 'TB_Button_Image';
+    return B;
+};
+var FCKToolbarButtonUI = function (A, B, C, D, E, F) {
+    this.Name = A;
+    this.Label = B || A;
+    this.Tooltip = C || this.Label;
+    this.Style = E || 0;
+    this.State = F || 0;
+    this.Icon = new FCKIcon(D);
+    if (FCK.IECleanup) FCK.IECleanup.AddItem(this, FCKToolbarButtonUI_Cleanup);
+};
+FCKToolbarButtonUI.prototype._CreatePaddingElement = function (A) {
+    var B = A.createElement('IMG');
+    B.className = 'TB_Button_Padding';
+    B.src = FCK_SPACER_PATH;
+    return B;
+};
+FCKToolbarButtonUI.prototype.Create = function (A) {
+    var B = FCKTools.GetElementDocument(A);
+    var C = this.MainElement = B.createElement('DIV');
+    C.title = this.Tooltip;
+    if (FCKBrowserInfo.IsGecko) C.onmousedown = FCKTools.CancelEvent;
+    FCKTools.AddEventListenerEx(C, 'mouseover', FCKToolbarButtonUI_OnMouseOver, this);
+    FCKTools.AddEventListenerEx(C, 'mouseout', FCKToolbarButtonUI_OnMouseOut, this);
+    FCKTools.AddEventListenerEx(C, 'click', FCKToolbarButtonUI_OnClick, this);
+    this.ChangeState(this.State, true);
+    if (this.Style == 0 && !this.ShowArrow) {
+        C.appendChild(this.Icon.CreateIconElement(B));
+    } else {
+        var D = C.appendChild(B.createElement('TABLE'));
+        D.cellPadding = 0;
+        D.cellSpacing = 0;
+        var E = D.insertRow(-1);
+        var F = E.insertCell(-1);
+        if (this.Style == 0 || this.Style == 2) F.appendChild(this.Icon.CreateIconElement(B)); else F.appendChild(this._CreatePaddingElement(B));
+        if (this.Style == 1 || this.Style == 2) {
+            F = E.insertCell(-1);
+            F.className = 'TB_Button_Text';
+            F.noWrap = true;
+            F.appendChild(B.createTextNode(this.Label));
+        }
+        if (this.ShowArrow) {
+            if (this.Style != 0) {
+                E.insertCell(-1).appendChild(this._CreatePaddingElement(B));
+            }
+            F = E.insertCell(-1);
+            var G = F.appendChild(B.createElement('IMG'));
+            G.src = FCKConfig.SkinPath + 'images/toolbar.buttonarrow.gif';
+            G.width = 5;
+            G.height = 3;
+        }
+        F = E.insertCell(-1);
+        F.appendChild(this._CreatePaddingElement(B));
+    }
+    A.appendChild(C);
+};
+FCKToolbarButtonUI.prototype.ChangeState = function (A, B) {
+    if (!B && this.State == A) return;
+    var e = this.MainElement;
+    if (!e) return;
+    switch (parseInt(A, 10)) {
+        case 0:
+            e.className = 'TB_Button_Off';
+            break;
+        case 1:
+            e.className = 'TB_Button_On';
+            break;
+        case -1:
+            e.className = 'TB_Button_Disabled';
+            break;
+    }
+    this.State = A;
+};
+function FCKToolbarButtonUI_OnMouseOver(A, B) {
+    if (B.State == 0) this.className = 'TB_Button_Off_Over'; else if (B.State == 1) this.className = 'TB_Button_On_Over';
+}
+function FCKToolbarButtonUI_OnMouseOut(A, B) {
+    if (B.State == 0) this.className = 'TB_Button_Off'; else if (B.State == 1) this.className = 'TB_Button_On';
+}
+function FCKToolbarButtonUI_OnClick(A, B) {
+    if (B.OnClick && B.State != -1) B.OnClick(B);
+}
+function FCKToolbarButtonUI_Cleanup() {
+    this.MainElement = null;
+}
 var FCKToolbarButton=function(A,B,C,D,E,F,G){this.CommandName=A;this.Label=B;this.Tooltip=C;this.Style=D;this.SourceView=E?true:false;this.ContextSensitive=F?true:false;if (G==null) this.IconPath=FCKConfig.SkinPath+'toolbar/'+A.toLowerCase()+'.gif';else if (typeof(G)=='number') this.IconPath=[FCKConfig.SkinPath+'fck_strip.gif',16,G];else this.IconPath=G;};FCKToolbarButton.prototype.Create=function(A){this._UIButton=new FCKToolbarButtonUI(this.CommandName,this.Label,this.Tooltip,this.IconPath,this.Style);this._UIButton.OnClick=this.Click;this._UIButton._ToolbarButton=this;this._UIButton.Create(A);};FCKToolbarButton.prototype.RefreshState=function(){var A=this._UIButton;if (!A) return;var B=FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName).GetState();if (B==A.State) return;A.ChangeState(B);};FCKToolbarButton.prototype.Click=function(){var A=this._ToolbarButton||this;FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(A.CommandName).Execute();};FCKToolbarButton.prototype.Enable=function(){this.RefreshState();};FCKToolbarButton.prototype.Disable=function(){this._UIButton.ChangeState(-1);};
-var FCKSpecialCombo=function(A,B,C,D,E){this.FieldWidth=B||100;this.PanelWidth=C||150;this.PanelMaxHeight=D||150;this.Label='&nbsp;';this.Caption=A;this.Tooltip=A;this.Style=2;this.Enabled=true;this.Items={};this._Panel=new FCKPanel(E||window);this._Panel.AppendStyleSheet(FCKConfig.SkinEditorCSS);this._PanelBox=this._Panel.MainNode.appendChild(this._Panel.Document.createElement('DIV'));this._PanelBox.className='SC_Panel';this._PanelBox.style.width=this.PanelWidth+'px';this._PanelBox.innerHTML='<table cellpadding="0" cellspacing="0" width="100%" style="TABLE-LAYOUT: fixed"><tr><td nowrap></td></tr></table>';this._ItemsHolderEl=this._PanelBox.getElementsByTagName('TD')[0];if (FCK.IECleanup) FCK.IECleanup.AddItem(this,FCKSpecialCombo_Cleanup);};function FCKSpecialCombo_ItemOnMouseOver(){this.className+=' SC_ItemOver';};function FCKSpecialCombo_ItemOnMouseOut(){this.className=this.originalClass;};function FCKSpecialCombo_ItemOnClick(A,B,C){this.className=this.originalClass;B._Panel.Hide();B.SetLabel(this.FCKItemLabel);if (typeof(B.OnSelect)=='function') B.OnSelect(C,this);};FCKSpecialCombo.prototype.ClearItems=function (){if (this.Items) this.Items={};var A=this._ItemsHolderEl;while (A.firstChild) A.removeChild(A.firstChild);};FCKSpecialCombo.prototype.AddItem=function(A,B,C,D){var E=this._ItemsHolderEl.appendChild(this._Panel.Document.createElement('DIV'));E.className=E.originalClass='SC_Item';E.innerHTML=B;E.FCKItemLabel=C||A;E.Selected=false;if (FCKBrowserInfo.IsIE) E.style.width='100%';if (D) E.style.backgroundColor=D;FCKTools.AddEventListenerEx(E,'mouseover',FCKSpecialCombo_ItemOnMouseOver);FCKTools.AddEventListenerEx(E,'mouseout',FCKSpecialCombo_ItemOnMouseOut);FCKTools.AddEventListenerEx(E,'click',FCKSpecialCombo_ItemOnClick,[this,A]);this.Items[A.toString().toLowerCase()]=E;return E;};FCKSpecialCombo.prototype.SelectItem=function(A){if (typeof A=='string') A=this.Items[A.toString().toLowerCase()];if (A){A.className=A.originalClass='SC_ItemSelected';A.Selected=true;}};FCKSpecialCombo.prototype.SelectItemByLabel=function(A,B){for (var C in this.Items){var D=this.Items[C];if (D.FCKItemLabel==A){D.className=D.originalClass='SC_ItemSelected';D.Selected=true;if (B) this.SetLabel(A);}}};FCKSpecialCombo.prototype.DeselectAll=function(A){for (var i in this.Items){if (!this.Items[i]) continue;this.Items[i].className=this.Items[i].originalClass='SC_Item';this.Items[i].Selected=false;};if (A) this.SetLabel('');};FCKSpecialCombo.prototype.SetLabelById=function(A){A=A?A.toString().toLowerCase():'';var B=this.Items[A];this.SetLabel(B?B.FCKItemLabel:'');};FCKSpecialCombo.prototype.SetLabel=function(A){A=(!A||A.length==0)?'&nbsp;':A;if (A==this.Label) return;this.Label=A;var B=this._LabelEl;if (B){B.innerHTML=A;FCKTools.DisableSelection(B);}};FCKSpecialCombo.prototype.SetEnabled=function(A){this.Enabled=A;if (this._OuterTable) this._OuterTable.className=A?'':'SC_FieldDisabled';};FCKSpecialCombo.prototype.Create=function(A){var B=FCKTools.GetElementDocument(A);var C=this._OuterTable=A.appendChild(B.createElement('TABLE'));C.cellPadding=0;C.cellSpacing=0;C.insertRow(-1);var D;var E;switch (this.Style){case 0:D='TB_ButtonType_Icon';E=false;break;case 1:D='TB_ButtonType_Text';E=false;break;case 2:E=true;break;};if (this.Caption&&this.Caption.length>0&&E){var F=C.rows[0].insertCell(-1);F.innerHTML=this.Caption;F.className='SC_FieldCaption';};var G=FCKTools.AppendElement(C.rows[0].insertCell(-1),'div');if (E){G.className='SC_Field';G.style.width=this.FieldWidth+'px';G.innerHTML='<table width="100%" cellpadding="0" cellspacing="0" style="TABLE-LAYOUT: fixed;"><tbody><tr><td class="SC_FieldLabel"><label>&nbsp;</label></td><td class="SC_FieldButton">&nbsp;</td></tr></tbody></table>';this._LabelEl=G.getElementsByTagName('label')[0];this._LabelEl.innerHTML=this.Label;}else{G.className='TB_Button_Off';G.innerHTML='<table title="'+this.Tooltip+'" class="'+D+'" cellspacing="0" cellpadding="0" border="0"><tr><td><img class="TB_Button_Padding" src="'+FCK_SPACER_PATH+'" /></td><td class="TB_Text">'+this.Caption+'</td><td><img class="TB_Button_Padding" src="'+FCK_SPACER_PATH+'" /></td><td class="TB_ButtonArrow"><img src="'+FCKConfig.SkinPath+'images/toolbar.buttonarrow.gif" width="5" height="3"></td><td><img class="TB_Button_Padding" src="'+FCK_SPACER_PATH+'" /></td></tr></table>';};FCKTools.AddEventListenerEx(G,'mouseover',FCKSpecialCombo_OnMouseOver,this);FCKTools.AddEventListenerEx(G,'mouseout',FCKSpecialCombo_OnMouseOut,this);FCKTools.AddEventListenerEx(G,'click',FCKSpecialCombo_OnClick,this);FCKTools.DisableSelection(this._Panel.Document.body);};function FCKSpecialCombo_Cleanup(){this._LabelEl=null;this._OuterTable=null;this._ItemsHolderEl=null;this._PanelBox=null;if (this.Items){for (var A in this.Items) this.Items[A]=null;}};function FCKSpecialCombo_OnMouseOver(A,B){if (B.Enabled){switch (B.Style){case 0:this.className='TB_Button_On_Over';break;case 1:this.className='TB_Button_On_Over';break;case 2:this.className='SC_Field SC_FieldOver';break;}}};function FCKSpecialCombo_OnMouseOut(A,B){switch (B.Style){case 0:this.className='TB_Button_Off';break;case 1:this.className='TB_Button_Off';break;case 2:this.className='SC_Field';break;}};function FCKSpecialCombo_OnClick(e,A){if (A.Enabled){var B=A._Panel;var C=A._PanelBox;var D=A._ItemsHolderEl;var E=A.PanelMaxHeight;if (A.OnBeforeClick) A.OnBeforeClick(A);if (FCKBrowserInfo.IsIE) B.Preload(0,this.offsetHeight,this);if (D.offsetHeight>E) C.style.height=E+'px';else C.style.height='';B.Show(0,this.offsetHeight,this);}};
-var FCKToolbarSpecialCombo=function(){this.SourceView=false;this.ContextSensitive=true;this.FieldWidth=null;this.PanelWidth=null;this.PanelMaxHeight=null;};FCKToolbarSpecialCombo.prototype.DefaultLabel='';function FCKToolbarSpecialCombo_OnSelect(A,B){FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName).Execute(A,B);};FCKToolbarSpecialCombo.prototype.Create=function(A){this._Combo=new FCKSpecialCombo(this.GetLabel(),this.FieldWidth,this.PanelWidth,this.PanelMaxHeight,FCKBrowserInfo.IsIE?window:FCKTools.GetElementWindow(A).parent);this._Combo.Tooltip=this.Tooltip;this._Combo.Style=this.Style;this.CreateItems(this._Combo);this._Combo.Create(A);this._Combo.CommandName=this.CommandName;this._Combo.OnSelect=FCKToolbarSpecialCombo_OnSelect;};function FCKToolbarSpecialCombo_RefreshActiveItems(A,B){A.DeselectAll();A.SelectItem(B);A.SetLabelById(B);};FCKToolbarSpecialCombo.prototype.RefreshState=function(){var A;var B=FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName).GetState();if (B!=-1){A=1;if (this.RefreshActiveItems) this.RefreshActiveItems(this._Combo,B);else{if (this._LastValue!==B){this._LastValue=B;if (!B||B.length==0){this._Combo.DeselectAll();this._Combo.SetLabel(this.DefaultLabel);}else FCKToolbarSpecialCombo_RefreshActiveItems(this._Combo,B);}}}else A=-1;if (A==this.State) return;if (A==-1){this._Combo.DeselectAll();this._Combo.SetLabel('');};this.State=A;this._Combo.SetEnabled(A!=-1);};FCKToolbarSpecialCombo.prototype.Enable=function(){this.RefreshState();};FCKToolbarSpecialCombo.prototype.Disable=function(){this.State=-1;this._Combo.DeselectAll();this._Combo.SetLabel('');this._Combo.SetEnabled(false);};
-var FCKToolbarStyleCombo=function(A,B){if (A===false) return;this.CommandName='Style';this.Label=this.GetLabel();this.Tooltip=A?A:this.Label;this.Style=B?B:2;this.DefaultLabel=FCKConfig.DefaultStyleLabel||'';};FCKToolbarStyleCombo.prototype=new FCKToolbarSpecialCombo;FCKToolbarStyleCombo.prototype.GetLabel=function(){return FCKLang.Style;};FCKToolbarStyleCombo.prototype.GetStyles=function(){var A={};var B=FCK.ToolbarSet.CurrentInstance.Styles.GetStyles();for (var C in B){var D=B[C];if (!D.IsCore) A[C]=D;};return A;};FCKToolbarStyleCombo.prototype.CreateItems=function(A){var B=A._Panel.Document;FCKTools.AppendStyleSheet(B,FCKConfig.ToolbarComboPreviewCSS);FCKTools.AppendStyleString(B,FCKConfig.EditorAreaStyles);B.body.className+=' ForceBaseFont';FCKConfig.ApplyBodyAttributes(B.body);var C=this.GetStyles();for (var D in C){var E=C[D];var F=E.GetType()==2?D:FCKToolbarStyleCombo_BuildPreview(E,E.Label||D);var G=A.AddItem(D,F);G.Style=E;};A.OnBeforeClick=this.StyleCombo_OnBeforeClick;};FCKToolbarStyleCombo.prototype.RefreshActiveItems=function(A){var B=FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);if (B){var C=new FCKElementPath(B);var D=C.Elements;for (var e=0;e<D.length;e++){for (var i in A.Items){var E=A.Items[i];var F=E.Style;if (F.CheckElementRemovable(D[e],true)){A.SetLabel(F.Label||F.Name);return;}}}};A.SetLabel(this.DefaultLabel);};FCKToolbarStyleCombo.prototype.StyleCombo_OnBeforeClick=function(A){A.DeselectAll();var B;var C;var D;var E=FCK.ToolbarSet.CurrentInstance.Selection;if (E.GetType()=='Control'){B=E.GetSelectedElement();D=B.nodeName.toLowerCase();}else{B=E.GetBoundaryParentElement(true);C=new FCKElementPath(B);};for (var i in A.Items){var F=A.Items[i];var G=F.Style;if ((D&&G.Element==D)||(!D&&G.GetType()!=2)){F.style.display='';if ((C&&G.CheckActive(C))||(!C&&G.CheckElementRemovable(B,true))) A.SelectItem(G.Name);}else F.style.display='none';}};function FCKToolbarStyleCombo_BuildPreview(A,B){var C=A.GetType();var D=[];if (C==0) D.push('<div class="BaseFont">');var E=A.Element;if (E=='bdo') E='span';D=['<',E];var F=A._StyleDesc.Attributes;if (F){for (var G in F){D.push(' ',G,'="',A.GetFinalAttributeValue(G),'"');}};if (A._GetStyleText().length>0) D.push(' style="',A.GetFinalStyleValue(),'"');D.push('>',B,'</',E,'>');if (C==0) D.push('</div>');return D.join('');};
-var FCKToolbarFontFormatCombo=function(A,B){if (A===false) return;this.CommandName='FontFormat';this.Label=this.GetLabel();this.Tooltip=A?A:this.Label;this.Style=B?B:2;this.NormalLabel='Normal';this.PanelWidth=190;this.DefaultLabel=FCKConfig.DefaultFontFormatLabel||'';};FCKToolbarFontFormatCombo.prototype=new FCKToolbarStyleCombo(false);FCKToolbarFontFormatCombo.prototype.GetLabel=function(){return FCKLang.FontFormat;};FCKToolbarFontFormatCombo.prototype.GetStyles=function(){var A={};var B=FCKLang['FontFormats'].split(';');var C={p:B[0],pre:B[1],address:B[2],h1:B[3],h2:B[4],h3:B[5],h4:B[6],h5:B[7],h6:B[8],div:B[9]||(B[0]+' (DIV)')};var D=FCKConfig.FontFormats.split(';');for (var i=0;i<D.length;i++){var E=D[i];var F=FCKStyles.GetStyle('_FCK_'+E);if (F){F.Label=C[E];A['_FCK_'+E]=F;}else alert("The FCKConfig.CoreStyles['"+E+"'] setting was not found. Please check the fckconfig.js file");};return A;};FCKToolbarFontFormatCombo.prototype.RefreshActiveItems=function(A){var B=FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);if (B){var C=new FCKElementPath(B);var D=C.Block;if (D){for (var i in A.Items){var E=A.Items[i];var F=E.Style;if (F.CheckElementRemovable(D)){A.SetLabel(F.Label);return;}}}};A.SetLabel(this.DefaultLabel);};FCKToolbarFontFormatCombo.prototype.StyleCombo_OnBeforeClick=function(A){A.DeselectAll();var B=FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);if (B){var C=new FCKElementPath(B);var D=C.Block;for (var i in A.Items){var E=A.Items[i];var F=E.Style;if (F.CheckElementRemovable(D)){A.SelectItem(E);return;}}}};
-var FCKToolbarFontsCombo=function(A,B){this.CommandName='FontName';this.Label=this.GetLabel();this.Tooltip=A?A:this.Label;this.Style=B?B:2;this.DefaultLabel=FCKConfig.DefaultFontLabel||'';};FCKToolbarFontsCombo.prototype=new FCKToolbarFontFormatCombo(false);FCKToolbarFontsCombo.prototype.GetLabel=function(){return FCKLang.Font;};FCKToolbarFontsCombo.prototype.GetStyles=function(){var A=FCKStyles.GetStyle('_FCK_FontFace');if (!A){alert("The FCKConfig.CoreStyles['Size'] setting was not found. Please check the fckconfig.js file");return {};};var B={};var C=FCKConfig.FontNames.split(';');for (var i=0;i<C.length;i++){var D=C[i].split('/');var E=D[0];var F=D[1]||E;var G=FCKTools.CloneObject(A);G.SetVariable('Font',E);G.Label=F;B[F]=G;};return B;};FCKToolbarFontsCombo.prototype.RefreshActiveItems=FCKToolbarStyleCombo.prototype.RefreshActiveItems;FCKToolbarFontsCombo.prototype.StyleCombo_OnBeforeClick=function(A){A.DeselectAll();var B=FCKSelection.GetBoundaryParentElement(true);if (B){var C=new FCKElementPath(B);for (var i in A.Items){var D=A.Items[i];var E=D.Style;if (E.CheckActive(C)){A.SelectItem(D);return;}}}};
-var FCKToolbarFontSizeCombo=function(A,B){this.CommandName='FontSize';this.Label=this.GetLabel();this.Tooltip=A?A:this.Label;this.Style=B?B:2;this.DefaultLabel=FCKConfig.DefaultFontSizeLabel||'';this.FieldWidth=70;};FCKToolbarFontSizeCombo.prototype=new FCKToolbarFontFormatCombo(false);FCKToolbarFontSizeCombo.prototype.GetLabel=function(){return FCKLang.FontSize;};FCKToolbarFontSizeCombo.prototype.GetStyles=function(){var A=FCKStyles.GetStyle('_FCK_Size');if (!A){alert("The FCKConfig.CoreStyles['FontFace'] setting was not found. Please check the fckconfig.js file");return {};};var B={};var C=FCKConfig.FontSizes.split(';');for (var i=0;i<C.length;i++){var D=C[i].split('/');var E=D[0];var F=D[1]||E;var G=FCKTools.CloneObject(A);G.SetVariable('Size',E);G.Label=F;B[F]=G;};return B;};FCKToolbarFontSizeCombo.prototype.RefreshActiveItems=FCKToolbarStyleCombo.prototype.RefreshActiveItems;FCKToolbarFontSizeCombo.prototype.StyleCombo_OnBeforeClick=FCKToolbarFontsCombo.prototype.StyleCombo_OnBeforeClick;
-var FCKToolbarPanelButton=function(A,B,C,D,E){this.CommandName=A;var F;if (E==null) F=FCKConfig.SkinPath+'toolbar/'+A.toLowerCase()+'.gif';else if (typeof(E)=='number') F=[FCKConfig.SkinPath+'fck_strip.gif',16,E];var G=this._UIButton=new FCKToolbarButtonUI(A,B,C,F,D);G._FCKToolbarPanelButton=this;G.ShowArrow=true;G.OnClick=FCKToolbarPanelButton_OnButtonClick;};FCKToolbarPanelButton.prototype.TypeName='FCKToolbarPanelButton';FCKToolbarPanelButton.prototype.Create=function(A){A.className+='Menu';this._UIButton.Create(A);var B=FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName)._Panel;this.RegisterPanel(B);};FCKToolbarPanelButton.prototype.RegisterPanel=function(A){if (A._FCKToolbarPanelButton) return;A._FCKToolbarPanelButton=this;var B=A.Document.body.appendChild(A.Document.createElement('div'));B.style.position='absolute';B.style.top='0px';var C=A._FCKToolbarPanelButtonLineDiv=B.appendChild(A.Document.createElement('IMG'));C.className='TB_ConnectionLine';C.style.position='absolute';C.src=FCK_SPACER_PATH;A.OnHide=FCKToolbarPanelButton_OnPanelHide;};function FCKToolbarPanelButton_OnButtonClick(A){var B=this._FCKToolbarPanelButton;var e=B._UIButton.MainElement;B._UIButton.ChangeState(1);var C=FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(B.CommandName);var D=C._Panel;D._FCKToolbarPanelButtonLineDiv.style.width=(e.offsetWidth-2)+'px';C.Execute(0,e.offsetHeight-1,e);};function FCKToolbarPanelButton_OnPanelHide(){var A=this._FCKToolbarPanelButton;A._UIButton.ChangeState(0);};FCKToolbarPanelButton.prototype.RefreshState=FCKToolbarButton.prototype.RefreshState;FCKToolbarPanelButton.prototype.Enable=FCKToolbarButton.prototype.Enable;FCKToolbarPanelButton.prototype.Disable=FCKToolbarButton.prototype.Disable;
-var FCKToolbarItems={};FCKToolbarItems.LoadedItems={};FCKToolbarItems.RegisterItem=function(A,B){this.LoadedItems[A]=B;};FCKToolbarItems.GetItem=function(A){var B=FCKToolbarItems.LoadedItems[A];if (B) return B;switch (A){case 'Source':B=new FCKToolbarButton('Source',FCKLang.Source,null,2,true,true,1);break;case 'DocProps':B=new FCKToolbarButton('DocProps',FCKLang.DocProps,null,null,null,null,2);break;case 'Save':B=new FCKToolbarButton('Save',FCKLang.Save,null,null,true,null,3);break;case 'NewPage':B=new FCKToolbarButton('NewPage',FCKLang.NewPage,null,null,true,null,4);break;case 'Preview':B=new FCKToolbarButton('Preview',FCKLang.Preview,null,null,true,null,5);break;case 'Templates':B=new FCKToolbarButton('Templates',FCKLang.Templates,null,null,null,null,6);break;case 'About':B=new FCKToolbarButton('About',FCKLang.About,null,null,true,null,47);break;case 'Cut':B=new FCKToolbarButton('Cut',FCKLang.Cut,null,null,false,true,7);break;case 'Copy':B=new FCKToolbarButton('Copy',FCKLang.Copy,null,null,false,true,8);break;case 'Paste':B=new FCKToolbarButton('Paste',FCKLang.Paste,null,null,false,true,9);break;case 'PasteText':B=new FCKToolbarButton('PasteText',FCKLang.PasteText,null,null,false,true,10);break;case 'PasteWord':B=new FCKToolbarButton('PasteWord',FCKLang.PasteWord,null,null,false,true,11);break;case 'Print':B=new FCKToolbarButton('Print',FCKLang.Print,null,null,false,true,12);break;case 'SpellCheck':B=new FCKToolbarButton('SpellCheck',FCKLang.SpellCheck,null,null,null,null,13);break;case 'Undo':B=new FCKToolbarButton('Undo',FCKLang.Undo,null,null,false,true,14);break;case 'Redo':B=new FCKToolbarButton('Redo',FCKLang.Redo,null,null,false,true,15);break;case 'SelectAll':B=new FCKToolbarButton('SelectAll',FCKLang.SelectAll,null,null,true,null,18);break;case 'RemoveFormat':B=new FCKToolbarButton('RemoveFormat',FCKLang.RemoveFormat,null,null,false,true,19);break;case 'FitWindow':B=new FCKToolbarButton('FitWindow',FCKLang.FitWindow,null,null,true,true,66);break;case 'Bold':B=new FCKToolbarButton('Bold',FCKLang.Bold,null,null,false,true,20);break;case 'Italic':B=new FCKToolbarButton('Italic',FCKLang.Italic,null,null,false,true,21);break;case 'Underline':B=new FCKToolbarButton('Underline',FCKLang.Underline,null,null,false,true,22);break;case 'StrikeThrough':B=new FCKToolbarButton('StrikeThrough',FCKLang.StrikeThrough,null,null,false,true,23);break;case 'Subscript':B=new FCKToolbarButton('Subscript',FCKLang.Subscript,null,null,false,true,24);break;case 'Superscript':B=new FCKToolbarButton('Superscript',FCKLang.Superscript,null,null,false,true,25);break;case 'OrderedList':B=new FCKToolbarButton('InsertOrderedList',FCKLang.NumberedListLbl,FCKLang.NumberedList,null,false,true,26);break;case 'UnorderedList':B=new FCKToolbarButton('InsertUnorderedList',FCKLang.BulletedListLbl,FCKLang.BulletedList,null,false,true,27);break;case 'Outdent':B=new FCKToolbarButton('Outdent',FCKLang.DecreaseIndent,null,null,false,true,28);break;case 'Indent':B=new FCKToolbarButton('Indent',FCKLang.IncreaseIndent,null,null,false,true,29);break;case 'Blockquote':B=new FCKToolbarButton('Blockquote',FCKLang.Blockquote,null,null,false,true,73);break;case 'CreateDiv':B=new FCKToolbarButton('CreateDiv',FCKLang.CreateDiv,null,null,false,true,74);break;case 'Link':B=new FCKToolbarButton('Link',FCKLang.InsertLinkLbl,FCKLang.InsertLink,null,false,true,34);break;case 'Unlink':B=new FCKToolbarButton('Unlink',FCKLang.RemoveLink,null,null,false,true,35);break;case 'Anchor':B=new FCKToolbarButton('Anchor',FCKLang.Anchor,null,null,null,null,36);break;case 'Image':B=new FCKToolbarButton('Image',FCKLang.InsertImageLbl,FCKLang.InsertImage,null,false,true,37);break;case 'Flash':B=new FCKToolbarButton('Flash',FCKLang.InsertFlashLbl,FCKLang.InsertFlash,null,false,true,38);break;case 'Table':B=new FCKToolbarButton('Table',FCKLang.InsertTableLbl,FCKLang.InsertTable,null,false,true,39);break;case 'SpecialChar':B=new FCKToolbarButton('SpecialChar',FCKLang.InsertSpecialCharLbl,FCKLang.InsertSpecialChar,null,false,true,42);break;case 'Smiley':B=new FCKToolbarButton('Smiley',FCKLang.InsertSmileyLbl,FCKLang.InsertSmiley,null,false,true,41);break;case 'PageBreak':B=new FCKToolbarButton('PageBreak',FCKLang.PageBreakLbl,FCKLang.PageBreak,null,false,true,43);break;case 'Rule':B=new FCKToolbarButton('Rule',FCKLang.InsertLineLbl,FCKLang.InsertLine,null,false,true,40);break;case 'JustifyLeft':B=new FCKToolbarButton('JustifyLeft',FCKLang.LeftJustify,null,null,false,true,30);break;case 'JustifyCenter':B=new FCKToolbarButton('JustifyCenter',FCKLang.CenterJustify,null,null,false,true,31);break;case 'JustifyRight':B=new FCKToolbarButton('JustifyRight',FCKLang.RightJustify,null,null,false,true,32);break;case 'JustifyFull':B=new FCKToolbarButton('JustifyFull',FCKLang.BlockJustify,null,null,false,true,33);break;case 'Style':B=new FCKToolbarStyleCombo();break;case 'FontName':B=new FCKToolbarFontsCombo();break;case 'FontSize':B=new FCKToolbarFontSizeCombo();break;case 'FontFormat':B=new FCKToolbarFontFormatCombo();break;case 'TextColor':B=new FCKToolbarPanelButton('TextColor',FCKLang.TextColor,null,null,45);break;case 'BGColor':B=new FCKToolbarPanelButton('BGColor',FCKLang.BGColor,null,null,46);break;case 'Find':B=new FCKToolbarButton('Find',FCKLang.Find,null,null,null,null,16);break;case 'Replace':B=new FCKToolbarButton('Replace',FCKLang.Replace,null,null,null,null,17);break;case 'Form':B=new FCKToolbarButton('Form',FCKLang.Form,null,null,null,null,48);break;case 'Checkbox':B=new FCKToolbarButton('Checkbox',FCKLang.Checkbox,null,null,null,null,49);break;case 'Radio':B=new FCKToolbarButton('Radio',FCKLang.RadioButton,null,null,null,null,50);break;case 'TextField':B=new FCKToolbarButton('TextField',FCKLang.TextField,null,null,null,null,51);break;case 'Textarea':B=new FCKToolbarButton('Textarea',FCKLang.Textarea,null,null,null,null,52);break;case 'HiddenField':B=new FCKToolbarButton('HiddenField',FCKLang.HiddenField,null,null,null,null,56);break;case 'Button':B=new FCKToolbarButton('Button',FCKLang.Button,null,null,null,null,54);break;case 'Select':B=new FCKToolbarButton('Select',FCKLang.SelectionField,null,null,null,null,53);break;case 'ImageButton':B=new FCKToolbarButton('ImageButton',FCKLang.ImageButton,null,null,null,null,55);break;case 'ShowBlocks':B=new FCKToolbarButton('ShowBlocks',FCKLang.ShowBlocks,null,null,null,true,72);break;default:alert(FCKLang.UnknownToolbarItem.replace(/%1/g,A));return null;};FCKToolbarItems.LoadedItems[A]=B;return B;};
-var FCKToolbar=function(){this.Items=[];};FCKToolbar.prototype.AddItem=function(A){return this.Items[this.Items.length]=A;};FCKToolbar.prototype.AddButton=function(A,B,C,D,E,F){if (typeof(D)=='number') D=[this.DefaultIconsStrip,this.DefaultIconSize,D];var G=new FCKToolbarButtonUI(A,B,C,D,E,F);G._FCKToolbar=this;G.OnClick=FCKToolbar_OnItemClick;return this.AddItem(G);};function FCKToolbar_OnItemClick(A){var B=A._FCKToolbar;if (B.OnItemClick) B.OnItemClick(B,A);};FCKToolbar.prototype.AddSeparator=function(){this.AddItem(new FCKToolbarSeparator());};FCKToolbar.prototype.Create=function(A){var B=FCKTools.GetElementDocument(A);var e=B.createElement('table');e.className='TB_Toolbar';e.style.styleFloat=e.style.cssFloat=(FCKLang.Dir=='ltr'?'left':'right');e.dir=FCKLang.Dir;e.cellPadding=0;e.cellSpacing=0;var C=e.insertRow(-1);var D;if (!this.HideStart){D=C.insertCell(-1);D.appendChild(B.createElement('div')).className='TB_Start';};for (var i=0;i<this.Items.length;i++){this.Items[i].Create(C.insertCell(-1));};if (!this.HideEnd){D=C.insertCell(-1);D.appendChild(B.createElement('div')).className='TB_End';};A.appendChild(e);};var FCKToolbarSeparator=function(){};FCKToolbarSeparator.prototype.Create=function(A){FCKTools.AppendElement(A,'div').className='TB_Separator';};
+var FCKSpecialCombo = function (A, B, C, D, E) {
+    this.FieldWidth = B || 100;
+    this.PanelWidth = C || 150;
+    this.PanelMaxHeight = D || 150;
+    this.Label = '&nbsp;';
+    this.Caption = A;
+    this.Tooltip = A;
+    this.Style = 2;
+    this.Enabled = true;
+    this.Items = {};
+    this._Panel = new FCKPanel(E || window);
+    this._Panel.AppendStyleSheet(FCKConfig.SkinEditorCSS);
+    this._PanelBox = this._Panel.MainNode.appendChild(this._Panel.Document.createElement('DIV'));
+    this._PanelBox.className = 'SC_Panel';
+    this._PanelBox.style.width = this.PanelWidth + 'px';
+    this._PanelBox.innerHTML = '<table cellpadding="0" cellspacing="0" width="100%" style="TABLE-LAYOUT: fixed"><tr><td nowrap></td></tr></table>';
+    this._ItemsHolderEl = this._PanelBox.getElementsByTagName('TD')[0];
+    if (FCK.IECleanup) FCK.IECleanup.AddItem(this, FCKSpecialCombo_Cleanup);
+};
+function FCKSpecialCombo_ItemOnMouseOver() {
+    this.className += ' SC_ItemOver';
+}
+function FCKSpecialCombo_ItemOnMouseOut() {
+    this.className = this.originalClass;
+}
+function FCKSpecialCombo_ItemOnClick(A, B, C) {
+    this.className = this.originalClass;
+    B._Panel.Hide();
+    B.SetLabel(this.FCKItemLabel);
+    if (typeof(B.OnSelect) == 'function') B.OnSelect(C, this);
+}
+FCKSpecialCombo.prototype.ClearItems = function () {
+    if (this.Items) this.Items = {};
+    var A = this._ItemsHolderEl;
+    while (A.firstChild) A.removeChild(A.firstChild);
+};
+FCKSpecialCombo.prototype.AddItem = function (A, B, C, D) {
+    var E = this._ItemsHolderEl.appendChild(this._Panel.Document.createElement('DIV'));
+    E.className = E.originalClass = 'SC_Item';
+    E.innerHTML = B;
+    E.FCKItemLabel = C || A;
+    E.Selected = false;
+    if (FCKBrowserInfo.IsIE) E.style.width = '100%';
+    if (D) E.style.backgroundColor = D;
+    FCKTools.AddEventListenerEx(E, 'mouseover', FCKSpecialCombo_ItemOnMouseOver);
+    FCKTools.AddEventListenerEx(E, 'mouseout', FCKSpecialCombo_ItemOnMouseOut);
+    FCKTools.AddEventListenerEx(E, 'click', FCKSpecialCombo_ItemOnClick, [this, A]);
+    this.Items[A.toString().toLowerCase()] = E;
+    return E;
+};
+FCKSpecialCombo.prototype.SelectItem = function (A) {
+    if (typeof A == 'string') A = this.Items[A.toString().toLowerCase()];
+    if (A) {
+        A.className = A.originalClass = 'SC_ItemSelected';
+        A.Selected = true;
+    }
+};
+FCKSpecialCombo.prototype.SelectItemByLabel = function (A, B) {
+    for (var C in this.Items) {
+        var D = this.Items[C];
+        if (D.FCKItemLabel == A) {
+            D.className = D.originalClass = 'SC_ItemSelected';
+            D.Selected = true;
+            if (B) this.SetLabel(A);
+        }
+    }
+};
+FCKSpecialCombo.prototype.DeselectAll = function (A) {
+    for (var i in this.Items) {
+        if (!this.Items[i]) continue;
+        this.Items[i].className = this.Items[i].originalClass = 'SC_Item';
+        this.Items[i].Selected = false;
+    }
+    if (A) this.SetLabel('');
+};
+FCKSpecialCombo.prototype.SetLabelById = function (A) {
+    A = A ? A.toString().toLowerCase() : '';
+    var B = this.Items[A];
+    this.SetLabel(B ? B.FCKItemLabel : '');
+};
+FCKSpecialCombo.prototype.SetLabel = function (A) {
+    A = (!A || A.length == 0) ? '&nbsp;' : A;
+    if (A == this.Label) return;
+    this.Label = A;
+    var B = this._LabelEl;
+    if (B) {
+        B.innerHTML = A;
+        FCKTools.DisableSelection(B);
+    }
+};
+FCKSpecialCombo.prototype.SetEnabled = function (A) {
+    this.Enabled = A;
+    if (this._OuterTable) this._OuterTable.className = A ? '' : 'SC_FieldDisabled';
+};
+FCKSpecialCombo.prototype.Create = function (A) {
+    var B = FCKTools.GetElementDocument(A);
+    var C = this._OuterTable = A.appendChild(B.createElement('TABLE'));
+    C.cellPadding = 0;
+    C.cellSpacing = 0;
+    C.insertRow(-1);
+    var D;
+    var E;
+    switch (this.Style) {
+        case 0:
+            D = 'TB_ButtonType_Icon';
+            E = false;
+            break;
+        case 1:
+            D = 'TB_ButtonType_Text';
+            E = false;
+            break;
+        case 2:
+            E = true;
+            break;
+    }
+    if (this.Caption && this.Caption.length > 0 && E) {
+        var F = C.rows[0].insertCell(-1);
+        F.innerHTML = this.Caption;
+        F.className = 'SC_FieldCaption';
+    }
+    var G = FCKTools.AppendElement(C.rows[0].insertCell(-1), 'div');
+    if (E) {
+        G.className = 'SC_Field';
+        G.style.width = this.FieldWidth + 'px';
+        G.innerHTML = '<table width="100%" cellpadding="0" cellspacing="0" style="TABLE-LAYOUT: fixed;"><tbody><tr><td class="SC_FieldLabel"><label>&nbsp;</label></td><td class="SC_FieldButton">&nbsp;</td></tr></tbody></table>';
+        this._LabelEl = G.getElementsByTagName('label')[0];
+        this._LabelEl.innerHTML = this.Label;
+    } else {
+        G.className = 'TB_Button_Off';
+        G.innerHTML = '<table title="' + this.Tooltip + '" class="' + D + '" cellspacing="0" cellpadding="0" border="0"><tr><td><img class="TB_Button_Padding" src="' + FCK_SPACER_PATH + '" /></td><td class="TB_Text">' + this.Caption + '</td><td><img class="TB_Button_Padding" src="' + FCK_SPACER_PATH + '" /></td><td class="TB_ButtonArrow"><img src="' + FCKConfig.SkinPath + 'images/toolbar.buttonarrow.gif" width="5" height="3"></td><td><img class="TB_Button_Padding" src="' + FCK_SPACER_PATH + '" /></td></tr></table>';
+    }
+    FCKTools.AddEventListenerEx(G, 'mouseover', FCKSpecialCombo_OnMouseOver, this);
+    FCKTools.AddEventListenerEx(G, 'mouseout', FCKSpecialCombo_OnMouseOut, this);
+    FCKTools.AddEventListenerEx(G, 'click', FCKSpecialCombo_OnClick, this);
+    FCKTools.DisableSelection(this._Panel.Document.body);
+};
+function FCKSpecialCombo_Cleanup() {
+    this._LabelEl = null;
+    this._OuterTable = null;
+    this._ItemsHolderEl = null;
+    this._PanelBox = null;
+    if (this.Items) {
+        for (var A in this.Items) this.Items[A] = null;
+    }
+}
+function FCKSpecialCombo_OnMouseOver(A, B) {
+    if (B.Enabled) {
+        switch (B.Style) {
+            case 0:
+                this.className = 'TB_Button_On_Over';
+                break;
+            case 1:
+                this.className = 'TB_Button_On_Over';
+                break;
+            case 2:
+                this.className = 'SC_Field SC_FieldOver';
+                break;
+        }
+    }
+}
+function FCKSpecialCombo_OnMouseOut(A, B) {
+    switch (B.Style) {
+        case 0:
+            this.className = 'TB_Button_Off';
+            break;
+        case 1:
+            this.className = 'TB_Button_Off';
+            break;
+        case 2:
+            this.className = 'SC_Field';
+            break;
+    }
+}
+function FCKSpecialCombo_OnClick(e, A) {
+    if (A.Enabled) {
+        var B = A._Panel;
+        var C = A._PanelBox;
+        var D = A._ItemsHolderEl;
+        var E = A.PanelMaxHeight;
+        if (A.OnBeforeClick) A.OnBeforeClick(A);
+        if (FCKBrowserInfo.IsIE) B.Preload(0, this.offsetHeight, this);
+        if (D.offsetHeight > E) C.style.height = E + 'px'; else C.style.height = '';
+        B.Show(0, this.offsetHeight, this);
+    }
+}
+var FCKToolbarSpecialCombo = function () {
+    this.SourceView = false;
+    this.ContextSensitive = true;
+    this.FieldWidth = null;
+    this.PanelWidth = null;
+    this.PanelMaxHeight = null;
+};
+FCKToolbarSpecialCombo.prototype.DefaultLabel = '';
+function FCKToolbarSpecialCombo_OnSelect(A, B) {
+    FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName).Execute(A, B);
+}
+FCKToolbarSpecialCombo.prototype.Create = function (A) {
+    this._Combo = new FCKSpecialCombo(this.GetLabel(), this.FieldWidth, this.PanelWidth, this.PanelMaxHeight, FCKBrowserInfo.IsIE ? window : FCKTools.GetElementWindow(A).parent);
+    this._Combo.Tooltip = this.Tooltip;
+    this._Combo.Style = this.Style;
+    this.CreateItems(this._Combo);
+    this._Combo.Create(A);
+    this._Combo.CommandName = this.CommandName;
+    this._Combo.OnSelect = FCKToolbarSpecialCombo_OnSelect;
+};
+function FCKToolbarSpecialCombo_RefreshActiveItems(A, B) {
+    A.DeselectAll();
+    A.SelectItem(B);
+    A.SetLabelById(B);
+}
+FCKToolbarSpecialCombo.prototype.RefreshState = function () {
+    var A;
+    var B = FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName).GetState();
+    if (B != -1) {
+        A = 1;
+        if (this.RefreshActiveItems) this.RefreshActiveItems(this._Combo, B); else {
+            if (this._LastValue !== B) {
+                this._LastValue = B;
+                if (!B || B.length == 0) {
+                    this._Combo.DeselectAll();
+                    this._Combo.SetLabel(this.DefaultLabel);
+                } else FCKToolbarSpecialCombo_RefreshActiveItems(this._Combo, B);
+            }
+        }
+    } else A = -1;
+    if (A == this.State) return;
+    if (A == -1) {
+        this._Combo.DeselectAll();
+        this._Combo.SetLabel('');
+    }
+    this.State = A;
+    this._Combo.SetEnabled(A != -1);
+};
+FCKToolbarSpecialCombo.prototype.Enable = function () {
+    this.RefreshState();
+};
+FCKToolbarSpecialCombo.prototype.Disable = function () {
+    this.State = -1;
+    this._Combo.DeselectAll();
+    this._Combo.SetLabel('');
+    this._Combo.SetEnabled(false);
+};
+var FCKToolbarStyleCombo = function (A, B) {
+    if (A === false) return;
+    this.CommandName = 'Style';
+    this.Label = this.GetLabel();
+    this.Tooltip = A ? A : this.Label;
+    this.Style = B ? B : 2;
+    this.DefaultLabel = FCKConfig.DefaultStyleLabel || '';
+};
+FCKToolbarStyleCombo.prototype = new FCKToolbarSpecialCombo;
+FCKToolbarStyleCombo.prototype.GetLabel = function () {
+    return FCKLang.Style;
+};
+FCKToolbarStyleCombo.prototype.GetStyles = function () {
+    var A = {};
+    var B = FCK.ToolbarSet.CurrentInstance.Styles.GetStyles();
+    for (var C in B) {
+        var D = B[C];
+        if (!D.IsCore) A[C] = D;
+    }
+    return A;
+};
+FCKToolbarStyleCombo.prototype.CreateItems = function (A) {
+    var B = A._Panel.Document;
+    FCKTools.AppendStyleSheet(B, FCKConfig.ToolbarComboPreviewCSS);
+    FCKTools.AppendStyleString(B, FCKConfig.EditorAreaStyles);
+    B.body.className += ' ForceBaseFont';
+    FCKConfig.ApplyBodyAttributes(B.body);
+    var C = this.GetStyles();
+    for (var D in C) {
+        var E = C[D];
+        var F = E.GetType() == 2 ? D : FCKToolbarStyleCombo_BuildPreview(E, E.Label || D);
+        var G = A.AddItem(D, F);
+        G.Style = E;
+    }
+    A.OnBeforeClick = this.StyleCombo_OnBeforeClick;
+};
+FCKToolbarStyleCombo.prototype.RefreshActiveItems = function (A) {
+    var B = FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);
+    if (B) {
+        var C = new FCKElementPath(B);
+        var D = C.Elements;
+        for (var e = 0; e < D.length; e++) {
+            for (var i in A.Items) {
+                var E = A.Items[i];
+                var F = E.Style;
+                if (F.CheckElementRemovable(D[e], true)) {
+                    A.SetLabel(F.Label || F.Name);
+                    return;
+                }
+            }
+        }
+    }
+    A.SetLabel(this.DefaultLabel);
+};
+FCKToolbarStyleCombo.prototype.StyleCombo_OnBeforeClick = function (A) {
+    A.DeselectAll();
+    var B;
+    var C;
+    var D;
+    var E = FCK.ToolbarSet.CurrentInstance.Selection;
+    if (E.GetType() == 'Control') {
+        B = E.GetSelectedElement();
+        D = B.nodeName.toLowerCase();
+    } else {
+        B = E.GetBoundaryParentElement(true);
+        C = new FCKElementPath(B);
+    }
+    for (var i in A.Items) {
+        var F = A.Items[i];
+        var G = F.Style;
+        if ((D && G.Element == D) || (!D && G.GetType() != 2)) {
+            F.style.display = '';
+            if ((C && G.CheckActive(C)) || (!C && G.CheckElementRemovable(B, true))) A.SelectItem(G.Name);
+        } else F.style.display = 'none';
+    }
+};
+function FCKToolbarStyleCombo_BuildPreview(A, B) {
+    var C = A.GetType();
+    var D = [];
+    if (C == 0) D.push('<div class="BaseFont">');
+    var E = A.Element;
+    if (E == 'bdo') E = 'span';
+    D = ['<', E];
+    var F = A._StyleDesc.Attributes;
+    if (F) {
+        for (var G in F) {
+            D.push(' ', G, '="', A.GetFinalAttributeValue(G), '"');
+        }
+    }
+    if (A._GetStyleText().length > 0) D.push(' style="', A.GetFinalStyleValue(), '"');
+    D.push('>', B, '</', E, '>');
+    if (C == 0) D.push('</div>');
+    return D.join('');
+}
+var FCKToolbarFontFormatCombo = function (A, B) {
+    if (A === false) return;
+    this.CommandName = 'FontFormat';
+    this.Label = this.GetLabel();
+    this.Tooltip = A ? A : this.Label;
+    this.Style = B ? B : 2;
+    this.NormalLabel = 'Normal';
+    this.PanelWidth = 190;
+    this.DefaultLabel = FCKConfig.DefaultFontFormatLabel || '';
+};
+FCKToolbarFontFormatCombo.prototype = new FCKToolbarStyleCombo(false);
+FCKToolbarFontFormatCombo.prototype.GetLabel = function () {
+    return FCKLang.FontFormat;
+};
+FCKToolbarFontFormatCombo.prototype.GetStyles = function () {
+    var A = {};
+    var B = FCKLang['FontFormats'].split(';');
+    var C = {
+        p: B[0],
+        pre: B[1],
+        address: B[2],
+        h1: B[3],
+        h2: B[4],
+        h3: B[5],
+        h4: B[6],
+        h5: B[7],
+        h6: B[8],
+        div: B[9] || (B[0] + ' (DIV)')
+    };
+    var D = FCKConfig.FontFormats.split(';');
+    for (var i = 0; i < D.length; i++) {
+        var E = D[i];
+        var F = FCKStyles.GetStyle('_FCK_' + E);
+        if (F) {
+            F.Label = C[E];
+            A['_FCK_' + E] = F;
+        } else alert("The FCKConfig.CoreStyles['" + E + "'] setting was not found. Please check the fckconfig.js file");
+    }
+    return A;
+};
+FCKToolbarFontFormatCombo.prototype.RefreshActiveItems = function (A) {
+    var B = FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);
+    if (B) {
+        var C = new FCKElementPath(B);
+        var D = C.Block;
+        if (D) {
+            for (var i in A.Items) {
+                var E = A.Items[i];
+                var F = E.Style;
+                if (F.CheckElementRemovable(D)) {
+                    A.SetLabel(F.Label);
+                    return;
+                }
+            }
+        }
+    }
+    A.SetLabel(this.DefaultLabel);
+};
+FCKToolbarFontFormatCombo.prototype.StyleCombo_OnBeforeClick = function (A) {
+    A.DeselectAll();
+    var B = FCK.ToolbarSet.CurrentInstance.Selection.GetBoundaryParentElement(true);
+    if (B) {
+        var C = new FCKElementPath(B);
+        var D = C.Block;
+        for (var i in A.Items) {
+            var E = A.Items[i];
+            var F = E.Style;
+            if (F.CheckElementRemovable(D)) {
+                A.SelectItem(E);
+                return;
+            }
+        }
+    }
+};
+var FCKToolbarFontsCombo = function (A, B) {
+    this.CommandName = 'FontName';
+    this.Label = this.GetLabel();
+    this.Tooltip = A ? A : this.Label;
+    this.Style = B ? B : 2;
+    this.DefaultLabel = FCKConfig.DefaultFontLabel || '';
+};
+FCKToolbarFontsCombo.prototype = new FCKToolbarFontFormatCombo(false);
+FCKToolbarFontsCombo.prototype.GetLabel = function () {
+    return FCKLang.Font;
+};
+FCKToolbarFontsCombo.prototype.GetStyles = function () {
+    var A = FCKStyles.GetStyle('_FCK_FontFace');
+    if (!A) {
+        alert("The FCKConfig.CoreStyles['Size'] setting was not found. Please check the fckconfig.js file");
+        return {};
+    }
+    var B = {};
+    var C = FCKConfig.FontNames.split(';');
+    for (var i = 0; i < C.length; i++) {
+        var D = C[i].split('/');
+        var E = D[0];
+        var F = D[1] || E;
+        var G = FCKTools.CloneObject(A);
+        G.SetVariable('Font', E);
+        G.Label = F;
+        B[F] = G;
+    }
+    return B;
+};
+FCKToolbarFontsCombo.prototype.RefreshActiveItems = FCKToolbarStyleCombo.prototype.RefreshActiveItems;
+FCKToolbarFontsCombo.prototype.StyleCombo_OnBeforeClick = function (A) {
+    A.DeselectAll();
+    var B = FCKSelection.GetBoundaryParentElement(true);
+    if (B) {
+        var C = new FCKElementPath(B);
+        for (var i in A.Items) {
+            var D = A.Items[i];
+            var E = D.Style;
+            if (E.CheckActive(C)) {
+                A.SelectItem(D);
+                return;
+            }
+        }
+    }
+};
+var FCKToolbarFontSizeCombo = function (A, B) {
+    this.CommandName = 'FontSize';
+    this.Label = this.GetLabel();
+    this.Tooltip = A ? A : this.Label;
+    this.Style = B ? B : 2;
+    this.DefaultLabel = FCKConfig.DefaultFontSizeLabel || '';
+    this.FieldWidth = 70;
+};
+FCKToolbarFontSizeCombo.prototype = new FCKToolbarFontFormatCombo(false);
+FCKToolbarFontSizeCombo.prototype.GetLabel = function () {
+    return FCKLang.FontSize;
+};
+FCKToolbarFontSizeCombo.prototype.GetStyles = function () {
+    var A = FCKStyles.GetStyle('_FCK_Size');
+    if (!A) {
+        alert("The FCKConfig.CoreStyles['FontFace'] setting was not found. Please check the fckconfig.js file");
+        return {};
+    }
+    var B = {};
+    var C = FCKConfig.FontSizes.split(';');
+    for (var i = 0; i < C.length; i++) {
+        var D = C[i].split('/');
+        var E = D[0];
+        var F = D[1] || E;
+        var G = FCKTools.CloneObject(A);
+        G.SetVariable('Size', E);
+        G.Label = F;
+        B[F] = G;
+    }
+    return B;
+};
+FCKToolbarFontSizeCombo.prototype.RefreshActiveItems = FCKToolbarStyleCombo.prototype.RefreshActiveItems;
+FCKToolbarFontSizeCombo.prototype.StyleCombo_OnBeforeClick = FCKToolbarFontsCombo.prototype.StyleCombo_OnBeforeClick;
+var FCKToolbarPanelButton = function (A, B, C, D, E) {
+    this.CommandName = A;
+    var F;
+    if (E == null) F = FCKConfig.SkinPath + 'toolbar/' + A.toLowerCase() + '.gif'; else if (typeof(E) == 'number') F = [FCKConfig.SkinPath + 'fck_strip.gif', 16, E];
+    var G = this._UIButton = new FCKToolbarButtonUI(A, B, C, F, D);
+    G._FCKToolbarPanelButton = this;
+    G.ShowArrow = true;
+    G.OnClick = FCKToolbarPanelButton_OnButtonClick;
+};
+FCKToolbarPanelButton.prototype.TypeName = 'FCKToolbarPanelButton';
+FCKToolbarPanelButton.prototype.Create = function (A) {
+    A.className += 'Menu';
+    this._UIButton.Create(A);
+    var B = FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(this.CommandName)._Panel;
+    this.RegisterPanel(B);
+};
+FCKToolbarPanelButton.prototype.RegisterPanel = function (A) {
+    if (A._FCKToolbarPanelButton) return;
+    A._FCKToolbarPanelButton = this;
+    var B = A.Document.body.appendChild(A.Document.createElement('div'));
+    B.style.position = 'absolute';
+    B.style.top = '0px';
+    var C = A._FCKToolbarPanelButtonLineDiv = B.appendChild(A.Document.createElement('IMG'));
+    C.className = 'TB_ConnectionLine';
+    C.style.position = 'absolute';
+    C.src = FCK_SPACER_PATH;
+    A.OnHide = FCKToolbarPanelButton_OnPanelHide;
+};
+function FCKToolbarPanelButton_OnButtonClick(A) {
+    var B = this._FCKToolbarPanelButton;
+    var e = B._UIButton.MainElement;
+    B._UIButton.ChangeState(1);
+    var C = FCK.ToolbarSet.CurrentInstance.Commands.GetCommand(B.CommandName);
+    var D = C._Panel;
+    D._FCKToolbarPanelButtonLineDiv.style.width = (e.offsetWidth - 2) + 'px';
+    C.Execute(0, e.offsetHeight - 1, e);
+}
+function FCKToolbarPanelButton_OnPanelHide() {
+    var A = this._FCKToolbarPanelButton;
+    A._UIButton.ChangeState(0);
+}
+FCKToolbarPanelButton.prototype.RefreshState = FCKToolbarButton.prototype.RefreshState;
+FCKToolbarPanelButton.prototype.Enable = FCKToolbarButton.prototype.Enable;
+FCKToolbarPanelButton.prototype.Disable = FCKToolbarButton.prototype.Disable;
+var FCKToolbarItems = {};
+FCKToolbarItems.LoadedItems = {};
+FCKToolbarItems.RegisterItem = function (A, B) {
+    this.LoadedItems[A] = B;
+};
+FCKToolbarItems.GetItem = function (A) {
+    var B = FCKToolbarItems.LoadedItems[A];
+    if (B) return B;
+    switch (A) {
+        case 'Source':
+            B = new FCKToolbarButton('Source', FCKLang.Source, null, 2, true, true, 1);
+            break;
+        case 'DocProps':
+            B = new FCKToolbarButton('DocProps', FCKLang.DocProps, null, null, null, null, 2);
+            break;
+        case 'Save':
+            B = new FCKToolbarButton('Save', FCKLang.Save, null, null, true, null, 3);
+            break;
+        case 'NewPage':
+            B = new FCKToolbarButton('NewPage', FCKLang.NewPage, null, null, true, null, 4);
+            break;
+        case 'Preview':
+            B = new FCKToolbarButton('Preview', FCKLang.Preview, null, null, true, null, 5);
+            break;
+        case 'Templates':
+            B = new FCKToolbarButton('Templates', FCKLang.Templates, null, null, null, null, 6);
+            break;
+        case 'About':
+            B = new FCKToolbarButton('About', FCKLang.About, null, null, true, null, 47);
+            break;
+        case 'Cut':
+            B = new FCKToolbarButton('Cut', FCKLang.Cut, null, null, false, true, 7);
+            break;
+        case 'Copy':
+            B = new FCKToolbarButton('Copy', FCKLang.Copy, null, null, false, true, 8);
+            break;
+        case 'Paste':
+            B = new FCKToolbarButton('Paste', FCKLang.Paste, null, null, false, true, 9);
+            break;
+        case 'PasteText':
+            B = new FCKToolbarButton('PasteText', FCKLang.PasteText, null, null, false, true, 10);
+            break;
+        case 'PasteWord':
+            B = new FCKToolbarButton('PasteWord', FCKLang.PasteWord, null, null, false, true, 11);
+            break;
+        case 'Print':
+            B = new FCKToolbarButton('Print', FCKLang.Print, null, null, false, true, 12);
+            break;
+        case 'SpellCheck':
+            B = new FCKToolbarButton('SpellCheck', FCKLang.SpellCheck, null, null, null, null, 13);
+            break;
+        case 'Undo':
+            B = new FCKToolbarButton('Undo', FCKLang.Undo, null, null, false, true, 14);
+            break;
+        case 'Redo':
+            B = new FCKToolbarButton('Redo', FCKLang.Redo, null, null, false, true, 15);
+            break;
+        case 'SelectAll':
+            B = new FCKToolbarButton('SelectAll', FCKLang.SelectAll, null, null, true, null, 18);
+            break;
+        case 'RemoveFormat':
+            B = new FCKToolbarButton('RemoveFormat', FCKLang.RemoveFormat, null, null, false, true, 19);
+            break;
+        case 'FitWindow':
+            B = new FCKToolbarButton('FitWindow', FCKLang.FitWindow, null, null, true, true, 66);
+            break;
+        case 'Bold':
+            B = new FCKToolbarButton('Bold', FCKLang.Bold, null, null, false, true, 20);
+            break;
+        case 'Italic':
+            B = new FCKToolbarButton('Italic', FCKLang.Italic, null, null, false, true, 21);
+            break;
+        case 'Underline':
+            B = new FCKToolbarButton('Underline', FCKLang.Underline, null, null, false, true, 22);
+            break;
+        case 'StrikeThrough':
+            B = new FCKToolbarButton('StrikeThrough', FCKLang.StrikeThrough, null, null, false, true, 23);
+            break;
+        case 'Subscript':
+            B = new FCKToolbarButton('Subscript', FCKLang.Subscript, null, null, false, true, 24);
+            break;
+        case 'Superscript':
+            B = new FCKToolbarButton('Superscript', FCKLang.Superscript, null, null, false, true, 25);
+            break;
+        case 'OrderedList':
+            B = new FCKToolbarButton('InsertOrderedList', FCKLang.NumberedListLbl, FCKLang.NumberedList, null, false, true, 26);
+            break;
+        case 'UnorderedList':
+            B = new FCKToolbarButton('InsertUnorderedList', FCKLang.BulletedListLbl, FCKLang.BulletedList, null, false, true, 27);
+            break;
+        case 'Outdent':
+            B = new FCKToolbarButton('Outdent', FCKLang.DecreaseIndent, null, null, false, true, 28);
+            break;
+        case 'Indent':
+            B = new FCKToolbarButton('Indent', FCKLang.IncreaseIndent, null, null, false, true, 29);
+            break;
+        case 'Blockquote':
+            B = new FCKToolbarButton('Blockquote', FCKLang.Blockquote, null, null, false, true, 73);
+            break;
+        case 'CreateDiv':
+            B = new FCKToolbarButton('CreateDiv', FCKLang.CreateDiv, null, null, false, true, 74);
+            break;
+        case 'Link':
+            B = new FCKToolbarButton('Link', FCKLang.InsertLinkLbl, FCKLang.InsertLink, null, false, true, 34);
+            break;
+        case 'Unlink':
+            B = new FCKToolbarButton('Unlink', FCKLang.RemoveLink, null, null, false, true, 35);
+            break;
+        case 'Anchor':
+            B = new FCKToolbarButton('Anchor', FCKLang.Anchor, null, null, null, null, 36);
+            break;
+        case 'Image':
+            B = new FCKToolbarButton('Image', FCKLang.InsertImageLbl, FCKLang.InsertImage, null, false, true, 37);
+            break;
+        case 'Flash':
+            B = new FCKToolbarButton('Flash', FCKLang.InsertFlashLbl, FCKLang.InsertFlash, null, false, true, 38);
+            break;
+        case 'Table':
+            B = new FCKToolbarButton('Table', FCKLang.InsertTableLbl, FCKLang.InsertTable, null, false, true, 39);
+            break;
+        case 'SpecialChar':
+            B = new FCKToolbarButton('SpecialChar', FCKLang.InsertSpecialCharLbl, FCKLang.InsertSpecialChar, null, false, true, 42);
+            break;
+        case 'Smiley':
+            B = new FCKToolbarButton('Smiley', FCKLang.InsertSmileyLbl, FCKLang.InsertSmiley, null, false, true, 41);
+            break;
+        case 'PageBreak':
+            B = new FCKToolbarButton('PageBreak', FCKLang.PageBreakLbl, FCKLang.PageBreak, null, false, true, 43);
+            break;
+        case 'Rule':
+            B = new FCKToolbarButton('Rule', FCKLang.InsertLineLbl, FCKLang.InsertLine, null, false, true, 40);
+            break;
+        case 'JustifyLeft':
+            B = new FCKToolbarButton('JustifyLeft', FCKLang.LeftJustify, null, null, false, true, 30);
+            break;
+        case 'JustifyCenter':
+            B = new FCKToolbarButton('JustifyCenter', FCKLang.CenterJustify, null, null, false, true, 31);
+            break;
+        case 'JustifyRight':
+            B = new FCKToolbarButton('JustifyRight', FCKLang.RightJustify, null, null, false, true, 32);
+            break;
+        case 'JustifyFull':
+            B = new FCKToolbarButton('JustifyFull', FCKLang.BlockJustify, null, null, false, true, 33);
+            break;
+        case 'Style':
+            B = new FCKToolbarStyleCombo();
+            break;
+        case 'FontName':
+            B = new FCKToolbarFontsCombo();
+            break;
+        case 'FontSize':
+            B = new FCKToolbarFontSizeCombo();
+            break;
+        case 'FontFormat':
+            B = new FCKToolbarFontFormatCombo();
+            break;
+        case 'TextColor':
+            B = new FCKToolbarPanelButton('TextColor', FCKLang.TextColor, null, null, 45);
+            break;
+        case 'BGColor':
+            B = new FCKToolbarPanelButton('BGColor', FCKLang.BGColor, null, null, 46);
+            break;
+        case 'Find':
+            B = new FCKToolbarButton('Find', FCKLang.Find, null, null, null, null, 16);
+            break;
+        case 'Replace':
+            B = new FCKToolbarButton('Replace', FCKLang.Replace, null, null, null, null, 17);
+            break;
+        case 'Form':
+            B = new FCKToolbarButton('Form', FCKLang.Form, null, null, null, null, 48);
+            break;
+        case 'Checkbox':
+            B = new FCKToolbarButton('Checkbox', FCKLang.Checkbox, null, null, null, null, 49);
+            break;
+        case 'Radio':
+            B = new FCKToolbarButton('Radio', FCKLang.RadioButton, null, null, null, null, 50);
+            break;
+        case 'TextField':
+            B = new FCKToolbarButton('TextField', FCKLang.TextField, null, null, null, null, 51);
+            break;
+        case 'Textarea':
+            B = new FCKToolbarButton('Textarea', FCKLang.Textarea, null, null, null, null, 52);
+            break;
+        case 'HiddenField':
+            B = new FCKToolbarButton('HiddenField', FCKLang.HiddenField, null, null, null, null, 56);
+            break;
+        case 'Button':
+            B = new FCKToolbarButton('Button', FCKLang.Button, null, null, null, null, 54);
+            break;
+        case 'Select':
+            B = new FCKToolbarButton('Select', FCKLang.SelectionField, null, null, null, null, 53);
+            break;
+        case 'ImageButton':
+            B = new FCKToolbarButton('ImageButton', FCKLang.ImageButton, null, null, null, null, 55);
+            break;
+        case 'ShowBlocks':
+            B = new FCKToolbarButton('ShowBlocks', FCKLang.ShowBlocks, null, null, null, true, 72);
+            break;
+        default:
+            alert(FCKLang.UnknownToolbarItem.replace(/%1/g, A));
+            return null;
+    }
+    FCKToolbarItems.LoadedItems[A] = B;
+    return B;
+};
+var FCKToolbar = function () {
+    this.Items = [];
+};
+FCKToolbar.prototype.AddItem = function (A) {
+    return this.Items[this.Items.length] = A;
+};
+FCKToolbar.prototype.AddButton = function (A, B, C, D, E, F) {
+    if (typeof(D) == 'number') D = [this.DefaultIconsStrip, this.DefaultIconSize, D];
+    var G = new FCKToolbarButtonUI(A, B, C, D, E, F);
+    G._FCKToolbar = this;
+    G.OnClick = FCKToolbar_OnItemClick;
+    return this.AddItem(G);
+};
+function FCKToolbar_OnItemClick(A) {
+    var B = A._FCKToolbar;
+    if (B.OnItemClick) B.OnItemClick(B, A);
+}
+FCKToolbar.prototype.AddSeparator = function () {
+    this.AddItem(new FCKToolbarSeparator());
+};
+FCKToolbar.prototype.Create = function (A) {
+    var B = FCKTools.GetElementDocument(A);
+    var e = B.createElement('table');
+    e.className = 'TB_Toolbar';
+    e.style.styleFloat = e.style.cssFloat = (FCKLang.Dir == 'ltr' ? 'left' : 'right');
+    e.dir = FCKLang.Dir;
+    e.cellPadding = 0;
+    e.cellSpacing = 0;
+    var C = e.insertRow(-1);
+    var D;
+    if (!this.HideStart) {
+        D = C.insertCell(-1);
+        D.appendChild(B.createElement('div')).className = 'TB_Start';
+    }
+    for (var i = 0; i < this.Items.length; i++) {
+        this.Items[i].Create(C.insertCell(-1));
+    }
+    if (!this.HideEnd) {
+        D = C.insertCell(-1);
+        D.appendChild(B.createElement('div')).className = 'TB_End';
+    }
+    A.appendChild(e);
+};
+var FCKToolbarSeparator = function () {
+};
+FCKToolbarSeparator.prototype.Create = function (A) {
+    FCKTools.AppendElement(A, 'div').className = 'TB_Separator';
+};
 var FCKToolbarBreak=function(){};FCKToolbarBreak.prototype.Create=function(A){var B=FCKTools.GetElementDocument(A).createElement('div');B.className='TB_Break';B.style.clear=FCKLang.Dir=='rtl'?'left':'right';A.appendChild(B);};
-function FCKToolbarSet_Create(A){var B;var C=A||FCKConfig.ToolbarLocation;switch (C){case 'In':document.getElementById('xToolbarRow').style.display='';B=new FCKToolbarSet(document);break;case 'None':B=new FCKToolbarSet(document);break;default:FCK.Events.AttachEvent('OnBlur',FCK_OnBlur);FCK.Events.AttachEvent('OnFocus',FCK_OnFocus);var D;var E=C.match(/^Out:(.+)\((\w+)\)$/);if (E){if (FCKBrowserInfo.IsAIR) FCKAdobeAIR.ToolbarSet_GetOutElement(window,E);else D=eval('parent.'+E[1]).document.getElementById(E[2]);}else{E=C.match(/^Out:(\w+)$/);if (E) D=parent.document.getElementById(E[1]);};if (!D){alert('Invalid value for "ToolbarLocation"');return arguments.callee('In');};B=D.__FCKToolbarSet;if (B) break;var F=FCKTools.GetElementDocument(D).createElement('iframe');F.src='javascript:void(0)';F.frameBorder=0;F.width='100%';F.height='10';D.appendChild(F);F.unselectable='on';var G=F.contentWindow.document;var H='';if (FCKBrowserInfo.IsSafari) H='<base href="'+window.document.location+'">';G.open();G.write('<html><head>'+H+'<script type="text/javascript"> var adjust = function() { window.frameElement.height = document.body.scrollHeight ; }; window.onresize = window.onload = function(){var timer = null;var lastHeight = -1;var lastChange = 0;var poller = function(){var currentHeight = document.body.scrollHeight || 0;var currentTime = (new Date()).getTime();if (currentHeight != lastHeight){lastChange = currentTime;adjust();lastHeight = document.body.scrollHeight;}if (lastChange < currentTime - 1000) clearInterval(timer);};timer = setInterval(poller, 100);}</script></head><body style="overflow: hidden">'+document.getElementById('xToolbarSpace').innerHTML+'</body></html>');G.close();if(FCKBrowserInfo.IsAIR) FCKAdobeAIR.ToolbarSet_InitOutFrame(G);FCKTools.AddEventListener(G,'contextmenu',FCKTools.CancelEvent);FCKTools.AppendStyleSheet(G,FCKConfig.SkinEditorCSS);B=D.__FCKToolbarSet=new FCKToolbarSet(G);B._IFrame=F;if (FCK.IECleanup) FCK.IECleanup.AddItem(D,FCKToolbarSet_Target_Cleanup);};B.CurrentInstance=FCK;if (!B.ToolbarItems) B.ToolbarItems=FCKToolbarItems;FCK.AttachToOnSelectionChange(B.RefreshItemsState);return B;};function FCK_OnBlur(A){var B=A.ToolbarSet;if (B.CurrentInstance==A) B.Disable();};function FCK_OnFocus(A){var B=A.ToolbarSet;var C=A||FCK;B.CurrentInstance.FocusManager.RemoveWindow(B._IFrame.contentWindow);B.CurrentInstance=C;C.FocusManager.AddWindow(B._IFrame.contentWindow,true);B.Enable();};function FCKToolbarSet_Cleanup(){this._TargetElement=null;this._IFrame=null;};function FCKToolbarSet_Target_Cleanup(){this.__FCKToolbarSet=null;};var FCKToolbarSet=function(A){this._Document=A;this._TargetElement=A.getElementById('xToolbar');var B=A.getElementById('xExpandHandle');var C=A.getElementById('xCollapseHandle');B.title=FCKLang.ToolbarExpand;FCKTools.AddEventListener(B,'click',FCKToolbarSet_Expand_OnClick);C.title=FCKLang.ToolbarCollapse;FCKTools.AddEventListener(C,'click',FCKToolbarSet_Collapse_OnClick);if (!FCKConfig.ToolbarCanCollapse||FCKConfig.ToolbarStartExpanded) this.Expand();else this.Collapse();C.style.display=FCKConfig.ToolbarCanCollapse?'':'none';if (FCKConfig.ToolbarCanCollapse) C.style.display='';else A.getElementById('xTBLeftBorder').style.display='';this.Toolbars=[];this.IsLoaded=false;if (FCK.IECleanup) FCK.IECleanup.AddItem(this,FCKToolbarSet_Cleanup);};function FCKToolbarSet_Expand_OnClick(){FCK.ToolbarSet.Expand();};function FCKToolbarSet_Collapse_OnClick(){FCK.ToolbarSet.Collapse();};FCKToolbarSet.prototype.Expand=function(){this._ChangeVisibility(false);};FCKToolbarSet.prototype.Collapse=function(){this._ChangeVisibility(true);};FCKToolbarSet.prototype._ChangeVisibility=function(A){this._Document.getElementById('xCollapsed').style.display=A?'':'none';this._Document.getElementById('xExpanded').style.display=A?'none':'';if (FCKBrowserInfo.IsGecko){FCKTools.RunFunction(window.onresize);}};FCKToolbarSet.prototype.Load=function(A){this.Name=A;this.Items=[];this.ItemsWysiwygOnly=[];this.ItemsContextSensitive=[];this._TargetElement.innerHTML='';var B=FCKConfig.ToolbarSets[A];if (!B){alert(FCKLang.UnknownToolbarSet.replace(/%1/g,A));return;};this.Toolbars=[];for (var x=0;x<B.length;x++){var C=B[x];if (!C) continue;var D;if (typeof(C)=='string'){if (C=='/') D=new FCKToolbarBreak();}else{D=new FCKToolbar();for (var j=0;j<C.length;j++){var E=C[j];if (E=='-') D.AddSeparator();else{var F=FCKToolbarItems.GetItem(E);if (F){D.AddItem(F);this.Items.push(F);if (!F.SourceView) this.ItemsWysiwygOnly.push(F);if (F.ContextSensitive) this.ItemsContextSensitive.push(F);}}}};D.Create(this._TargetElement);this.Toolbars[this.Toolbars.length]=D;};FCKTools.DisableSelection(this._Document.getElementById('xCollapseHandle').parentNode);if (FCK.Status!=2) FCK.Events.AttachEvent('OnStatusChange',this.RefreshModeState);else this.RefreshModeState();this.IsLoaded=true;this.IsEnabled=true;FCKTools.RunFunction(this.OnLoad);};FCKToolbarSet.prototype.Enable=function(){if (this.IsEnabled) return;this.IsEnabled=true;var A=this.Items;for (var i=0;i<A.length;i++) A[i].RefreshState();};FCKToolbarSet.prototype.Disable=function(){if (!this.IsEnabled) return;this.IsEnabled=false;var A=this.Items;for (var i=0;i<A.length;i++) A[i].Disable();};FCKToolbarSet.prototype.RefreshModeState=function(A){if (FCK.Status!=2) return;var B=A?A.ToolbarSet:this;var C=B.ItemsWysiwygOnly;if (FCK.EditMode==0){for (var i=0;i<C.length;i++) C[i].Enable();B.RefreshItemsState(A);}else{B.RefreshItemsState(A);for (var j=0;j<C.length;j++) C[j].Disable();}};FCKToolbarSet.prototype.RefreshItemsState=function(A){var B=(A?A.ToolbarSet:this).ItemsContextSensitive;for (var i=0;i<B.length;i++) B[i].RefreshState();};
-var FCKDialog=(function(){var A;var B;var C;var D=window.parent;while (D.parent&&D.parent!=D){try{if (D.parent.document.domain!=document.domain) break;if (D.parent.document.getElementsByTagName('frameset').length>0) break;}catch (e){break;};D=D.parent;};var E=D.document;var F=function(){if (!B) B=FCKConfig.FloatingPanelsZIndex+999;return++B;};var G=function(){if (!C) return;var H=FCKTools.IsStrictMode(E)?E.documentElement:E.body;FCKDomTools.SetElementStyles(C,{'width':Math.max(H.scrollWidth,H.clientWidth,E.scrollWidth||0)-1+'px','height':Math.max(H.scrollHeight,H.clientHeight,E.scrollHeight||0)-1+'px'});};return {OpenDialog:function(dialogName,dialogTitle,dialogPage,width,height,customValue,parentWindow,resizable){if (!A) this.DisplayMainCover();var I={Title:dialogTitle,Page:dialogPage,Editor:window,CustomValue:customValue,TopWindow:D};FCK.ToolbarSet.CurrentInstance.Selection.Save(true);var J=FCKTools.GetViewPaneSize(D);var K={ 'X':0,'Y':0 };var L=FCKBrowserInfo.IsIE&&(!FCKBrowserInfo.IsIE7||!FCKTools.IsStrictMode(D.document));if (L) K=FCKTools.GetScrollPosition(D);var M=Math.max(K.Y+(J.Height-height-20)/2,0);var N=Math.max(K.X+(J.Width-width-20)/2,0);var O=E.createElement('iframe');FCKTools.ResetStyles(O);O.src=FCKConfig.BasePath+'fckdialog.html';O.frameBorder=0;O.allowTransparency=true;FCKDomTools.SetElementStyles(O,{'position':(L)?'absolute':'fixed','top':M+'px','left':N+'px','width':width+'px','height':height+'px','zIndex':F()});O._DialogArguments=I;E.body.appendChild(O);O._ParentDialog=A;A=O;},OnDialogClose:function(dialogWindow){var O=dialogWindow.frameElement;FCKDomTools.RemoveNode(O);if (O._ParentDialog){A=O._ParentDialog;O._ParentDialog.contentWindow.SetEnabled(true);}else{if (!FCKBrowserInfo.IsIE) FCK.Focus();this.HideMainCover();setTimeout(function(){ A=null;},0);FCK.ToolbarSet.CurrentInstance.Selection.Release();}},DisplayMainCover:function(){C=E.createElement('div');FCKTools.ResetStyles(C);FCKDomTools.SetElementStyles(C,{'position':'absolute','zIndex':F(),'top':'0px','left':'0px','backgroundColor':FCKConfig.BackgroundBlockerColor});FCKDomTools.SetOpacity(C,FCKConfig.BackgroundBlockerOpacity);if (FCKBrowserInfo.IsIE&&!FCKBrowserInfo.IsIE7){var Q=E.createElement('iframe');FCKTools.ResetStyles(Q);Q.hideFocus=true;Q.frameBorder=0;Q.src=FCKTools.GetVoidUrl();FCKDomTools.SetElementStyles(Q,{'width':'100%','height':'100%','position':'absolute','left':'0px','top':'0px','filter':'progid:DXImageTransform.Microsoft.Alpha(opacity=0)'});C.appendChild(Q);};FCKTools.AddEventListener(D,'resize',G);G();E.body.appendChild(C);FCKFocusManager.Lock();var R=FCK.ToolbarSet.CurrentInstance.GetInstanceObject('frameElement');R._fck_originalTabIndex=R.tabIndex;R.tabIndex=-1;},HideMainCover:function(){FCKDomTools.RemoveNode(C);FCKFocusManager.Unlock();var R=FCK.ToolbarSet.CurrentInstance.GetInstanceObject('frameElement');R.tabIndex=R._fck_originalTabIndex;FCKDomTools.ClearElementJSProperty(R,'_fck_originalTabIndex');},GetCover:function(){return C;}};})();
-var FCKMenuItem=function(A,B,C,D,E,F){this.Name=B;this.Label=C||B;this.IsDisabled=E;this.Icon=new FCKIcon(D);this.SubMenu=new FCKMenuBlockPanel();this.SubMenu.Parent=A;this.SubMenu.OnClick=FCKTools.CreateEventListener(FCKMenuItem_SubMenu_OnClick,this);this.CustomData=F;if (FCK.IECleanup) FCK.IECleanup.AddItem(this,FCKMenuItem_Cleanup);};FCKMenuItem.prototype.AddItem=function(A,B,C,D,E){this.HasSubMenu=true;return this.SubMenu.AddItem(A,B,C,D,E);};FCKMenuItem.prototype.AddSeparator=function(){this.SubMenu.AddSeparator();};FCKMenuItem.prototype.Create=function(A){var B=this.HasSubMenu;var C=FCKTools.GetElementDocument(A);var r=this.MainElement=A.insertRow(-1);r.className=this.IsDisabled?'MN_Item_Disabled':'MN_Item';if (!this.IsDisabled){FCKTools.AddEventListenerEx(r,'mouseover',FCKMenuItem_OnMouseOver,[this]);FCKTools.AddEventListenerEx(r,'click',FCKMenuItem_OnClick,[this]);if (!B) FCKTools.AddEventListenerEx(r,'mouseout',FCKMenuItem_OnMouseOut,[this]);};var D=r.insertCell(-1);D.className='MN_Icon';D.appendChild(this.Icon.CreateIconElement(C));D=r.insertCell(-1);D.className='MN_Label';D.noWrap=true;D.appendChild(C.createTextNode(this.Label));D=r.insertCell(-1);if (B){D.className='MN_Arrow';var E=D.appendChild(C.createElement('IMG'));E.src=FCK_IMAGES_PATH+'arrow_'+FCKLang.Dir+'.gif';E.width=4;E.height=7;this.SubMenu.Create();this.SubMenu.Panel.OnHide=FCKTools.CreateEventListener(FCKMenuItem_SubMenu_OnHide,this);}};FCKMenuItem.prototype.Activate=function(){this.MainElement.className='MN_Item_Over';if (this.HasSubMenu){this.SubMenu.Show(this.MainElement.offsetWidth+2,-2,this.MainElement);};FCKTools.RunFunction(this.OnActivate,this);};FCKMenuItem.prototype.Deactivate=function(){this.MainElement.className='MN_Item';if (this.HasSubMenu) this.SubMenu.Hide();};function FCKMenuItem_SubMenu_OnClick(A,B){FCKTools.RunFunction(B.OnClick,B,[A]);};function FCKMenuItem_SubMenu_OnHide(A){A.Deactivate();};function FCKMenuItem_OnClick(A,B){if (B.HasSubMenu) B.Activate();else{B.Deactivate();FCKTools.RunFunction(B.OnClick,B,[B]);}};function FCKMenuItem_OnMouseOver(A,B){B.Activate();};function FCKMenuItem_OnMouseOut(A,B){B.Deactivate();};function FCKMenuItem_Cleanup(){this.MainElement=null;};
-var FCKMenuBlock=function(){this._Items=[];};FCKMenuBlock.prototype.Count=function(){return this._Items.length;};FCKMenuBlock.prototype.AddItem=function(A,B,C,D,E){var F=new FCKMenuItem(this,A,B,C,D,E);F.OnClick=FCKTools.CreateEventListener(FCKMenuBlock_Item_OnClick,this);F.OnActivate=FCKTools.CreateEventListener(FCKMenuBlock_Item_OnActivate,this);this._Items.push(F);return F;};FCKMenuBlock.prototype.AddSeparator=function(){this._Items.push(new FCKMenuSeparator());};FCKMenuBlock.prototype.RemoveAllItems=function(){this._Items=[];var A=this._ItemsTable;if (A){while (A.rows.length>0) A.deleteRow(0);}};FCKMenuBlock.prototype.Create=function(A){if (!this._ItemsTable){if (FCK.IECleanup) FCK.IECleanup.AddItem(this,FCKMenuBlock_Cleanup);this._Window=FCKTools.GetElementWindow(A);var B=FCKTools.GetElementDocument(A);var C=A.appendChild(B.createElement('table'));C.cellPadding=0;C.cellSpacing=0;FCKTools.DisableSelection(C);var D=C.insertRow(-1).insertCell(-1);D.className='MN_Menu';var E=this._ItemsTable=D.appendChild(B.createElement('table'));E.cellPadding=0;E.cellSpacing=0;};for (var i=0;i<this._Items.length;i++) this._Items[i].Create(this._ItemsTable);};function FCKMenuBlock_Item_OnClick(A,B){if (B.Hide) B.Hide();FCKTools.RunFunction(B.OnClick,B,[A]);};function FCKMenuBlock_Item_OnActivate(A){var B=A._ActiveItem;if (B&&B!=this){if (!FCKBrowserInfo.IsIE&&B.HasSubMenu&&!this.HasSubMenu){A._Window.focus();A.Panel.HasFocus=true;};B.Deactivate();};A._ActiveItem=this;};function FCKMenuBlock_Cleanup(){this._Window=null;this._ItemsTable=null;};var FCKMenuSeparator=function(){};FCKMenuSeparator.prototype.Create=function(A){var B=FCKTools.GetElementDocument(A);var r=A.insertRow(-1);var C=r.insertCell(-1);C.className='MN_Separator MN_Icon';C=r.insertCell(-1);C.className='MN_Separator';C.appendChild(B.createElement('DIV')).className='MN_Separator_Line';C=r.insertCell(-1);C.className='MN_Separator';C.appendChild(B.createElement('DIV')).className='MN_Separator_Line';};
+function FCKToolbarSet_Create(A) {
+    var B;
+    var C = A || FCKConfig.ToolbarLocation;
+    switch (C) {
+        case 'In':
+            document.getElementById('xToolbarRow').style.display = '';
+            B = new FCKToolbarSet(document);
+            break;
+        case 'None':
+            B = new FCKToolbarSet(document);
+            break;
+        default:
+            FCK.Events.AttachEvent('OnBlur', FCK_OnBlur);
+            FCK.Events.AttachEvent('OnFocus', FCK_OnFocus);
+            var D;
+            var E = C.match(/^Out:(.+)\((\w+)\)$/);
+            if (E) {
+                if (FCKBrowserInfo.IsAIR) FCKAdobeAIR.ToolbarSet_GetOutElement(window, E); else D = eval('parent.' + E[1]).document.getElementById(E[2]);
+            } else {
+                E = C.match(/^Out:(\w+)$/);
+                if (E) D = parent.document.getElementById(E[1]);
+            }
+            if (!D) {
+                alert('Invalid value for "ToolbarLocation"');
+                return arguments.callee('In');
+            }
+            B = D.__FCKToolbarSet;
+            if (B) break;
+            var F = FCKTools.GetElementDocument(D).createElement('iframe');
+            F.src = 'javascript:void(0)';
+            F.frameBorder = 0;
+            F.width = '100%';
+            F.height = '10';
+            D.appendChild(F);
+            F.unselectable = 'on';
+            var G = F.contentWindow.document;
+            var H = '';
+            if (FCKBrowserInfo.IsSafari) H = '<base href="' + window.document.location + '">';
+            G.open();
+            G.write('<html><head>' + H + '<script type="text/javascript"> var adjust = function() { window.frameElement.height = document.body.scrollHeight ; }; window.onresize = window.onload = function(){var timer = null;var lastHeight = -1;var lastChange = 0;var poller = function(){var currentHeight = document.body.scrollHeight || 0;var currentTime = (new Date()).getTime();if (currentHeight != lastHeight){lastChange = currentTime;adjust();lastHeight = document.body.scrollHeight;}if (lastChange < currentTime - 1000) clearInterval(timer);};timer = setInterval(poller, 100);}</script></head><body style="overflow: hidden">' + document.getElementById('xToolbarSpace').innerHTML + '</body></html>');
+            G.close();
+            if (FCKBrowserInfo.IsAIR) FCKAdobeAIR.ToolbarSet_InitOutFrame(G);
+            FCKTools.AddEventListener(G, 'contextmenu', FCKTools.CancelEvent);
+            FCKTools.AppendStyleSheet(G, FCKConfig.SkinEditorCSS);
+            B = D.__FCKToolbarSet = new FCKToolbarSet(G);
+            B._IFrame = F;
+            if (FCK.IECleanup) FCK.IECleanup.AddItem(D, FCKToolbarSet_Target_Cleanup);
+    }
+    B.CurrentInstance = FCK;
+    if (!B.ToolbarItems) B.ToolbarItems = FCKToolbarItems;
+    FCK.AttachToOnSelectionChange(B.RefreshItemsState);
+    return B;
+}
+function FCK_OnBlur(A) {
+    var B = A.ToolbarSet;
+    if (B.CurrentInstance == A) B.Disable();
+}
+function FCK_OnFocus(A) {
+    var B = A.ToolbarSet;
+    var C = A || FCK;
+    B.CurrentInstance.FocusManager.RemoveWindow(B._IFrame.contentWindow);
+    B.CurrentInstance = C;
+    C.FocusManager.AddWindow(B._IFrame.contentWindow, true);
+    B.Enable();
+}
+function FCKToolbarSet_Cleanup() {
+    this._TargetElement = null;
+    this._IFrame = null;
+}
+function FCKToolbarSet_Target_Cleanup() {
+    this.__FCKToolbarSet = null;
+}
+var FCKToolbarSet = function (A) {
+    this._Document = A;
+    this._TargetElement = A.getElementById('xToolbar');
+    var B = A.getElementById('xExpandHandle');
+    var C = A.getElementById('xCollapseHandle');
+    B.title = FCKLang.ToolbarExpand;
+    FCKTools.AddEventListener(B, 'click', FCKToolbarSet_Expand_OnClick);
+    C.title = FCKLang.ToolbarCollapse;
+    FCKTools.AddEventListener(C, 'click', FCKToolbarSet_Collapse_OnClick);
+    if (!FCKConfig.ToolbarCanCollapse || FCKConfig.ToolbarStartExpanded) this.Expand(); else this.Collapse();
+    C.style.display = FCKConfig.ToolbarCanCollapse ? '' : 'none';
+    if (FCKConfig.ToolbarCanCollapse) C.style.display = ''; else A.getElementById('xTBLeftBorder').style.display = '';
+    this.Toolbars = [];
+    this.IsLoaded = false;
+    if (FCK.IECleanup) FCK.IECleanup.AddItem(this, FCKToolbarSet_Cleanup);
+};
+function FCKToolbarSet_Expand_OnClick() {
+    FCK.ToolbarSet.Expand();
+}
+function FCKToolbarSet_Collapse_OnClick() {
+    FCK.ToolbarSet.Collapse();
+}
+FCKToolbarSet.prototype.Expand = function () {
+    this._ChangeVisibility(false);
+};
+FCKToolbarSet.prototype.Collapse = function () {
+    this._ChangeVisibility(true);
+};
+FCKToolbarSet.prototype._ChangeVisibility = function (A) {
+    this._Document.getElementById('xCollapsed').style.display = A ? '' : 'none';
+    this._Document.getElementById('xExpanded').style.display = A ? 'none' : '';
+    if (FCKBrowserInfo.IsGecko) {
+        FCKTools.RunFunction(window.onresize);
+    }
+};
+FCKToolbarSet.prototype.Load = function (A) {
+    this.Name = A;
+    this.Items = [];
+    this.ItemsWysiwygOnly = [];
+    this.ItemsContextSensitive = [];
+    this._TargetElement.innerHTML = '';
+    var B = FCKConfig.ToolbarSets[A];
+    if (!B) {
+        alert(FCKLang.UnknownToolbarSet.replace(/%1/g, A));
+        return;
+    }
+    this.Toolbars = [];
+    for (var x = 0; x < B.length; x++) {
+        var C = B[x];
+        if (!C) continue;
+        var D;
+        if (typeof(C) == 'string') {
+            if (C == '/') D = new FCKToolbarBreak();
+        } else {
+            D = new FCKToolbar();
+            for (var j = 0; j < C.length; j++) {
+                var E = C[j];
+                if (E == '-') D.AddSeparator(); else {
+                    var F = FCKToolbarItems.GetItem(E);
+                    if (F) {
+                        D.AddItem(F);
+                        this.Items.push(F);
+                        if (!F.SourceView) this.ItemsWysiwygOnly.push(F);
+                        if (F.ContextSensitive) this.ItemsContextSensitive.push(F);
+                    }
+                }
+            }
+        }
+        D.Create(this._TargetElement);
+        this.Toolbars[this.Toolbars.length] = D;
+    }
+    FCKTools.DisableSelection(this._Document.getElementById('xCollapseHandle').parentNode);
+    if (FCK.Status != 2) FCK.Events.AttachEvent('OnStatusChange', this.RefreshModeState); else this.RefreshModeState();
+    this.IsLoaded = true;
+    this.IsEnabled = true;
+    FCKTools.RunFunction(this.OnLoad);
+};
+FCKToolbarSet.prototype.Enable = function () {
+    if (this.IsEnabled) return;
+    this.IsEnabled = true;
+    var A = this.Items;
+    for (var i = 0; i < A.length; i++) A[i].RefreshState();
+};
+FCKToolbarSet.prototype.Disable = function () {
+    if (!this.IsEnabled) return;
+    this.IsEnabled = false;
+    var A = this.Items;
+    for (var i = 0; i < A.length; i++) A[i].Disable();
+};
+FCKToolbarSet.prototype.RefreshModeState = function (A) {
+    if (FCK.Status != 2) return;
+    var B = A ? A.ToolbarSet : this;
+    var C = B.ItemsWysiwygOnly;
+    if (FCK.EditMode == 0) {
+        for (var i = 0; i < C.length; i++) C[i].Enable();
+        B.RefreshItemsState(A);
+    } else {
+        B.RefreshItemsState(A);
+        for (var j = 0; j < C.length; j++) C[j].Disable();
+    }
+};
+FCKToolbarSet.prototype.RefreshItemsState = function (A) {
+    var B = (A ? A.ToolbarSet : this).ItemsContextSensitive;
+    for (var i = 0; i < B.length; i++) B[i].RefreshState();
+};
+var FCKDialog = (function () {
+    var A;
+    var B;
+    var C;
+    var D = window.parent;
+    while (D.parent && D.parent != D) {
+        try {
+            if (D.parent.document.domain != document.domain) break;
+            if (D.parent.document.getElementsByTagName('frameset').length > 0) break;
+        } catch (e) {
+            break;
+        }
+        D = D.parent;
+    }
+    var E = D.document;
+    var F = function () {
+        if (!B) B = FCKConfig.FloatingPanelsZIndex + 999;
+        return ++B;
+    };
+    var G = function () {
+        if (!C) return;
+        var H = FCKTools.IsStrictMode(E) ? E.documentElement : E.body;
+        FCKDomTools.SetElementStyles(C, {
+            'width': Math.max(H.scrollWidth, H.clientWidth, E.scrollWidth || 0) - 1 + 'px',
+            'height': Math.max(H.scrollHeight, H.clientHeight, E.scrollHeight || 0) - 1 + 'px'
+        });
+    };
+    return {
+        OpenDialog: function (dialogName, dialogTitle, dialogPage, width, height, customValue, parentWindow, resizable) {
+            if (!A) this.DisplayMainCover();
+            var I = {Title: dialogTitle, Page: dialogPage, Editor: window, CustomValue: customValue, TopWindow: D};
+            FCK.ToolbarSet.CurrentInstance.Selection.Save(true);
+            var J = FCKTools.GetViewPaneSize(D);
+            var K = {'X': 0, 'Y': 0};
+            var L = FCKBrowserInfo.IsIE && (!FCKBrowserInfo.IsIE7 || !FCKTools.IsStrictMode(D.document));
+            if (L) K = FCKTools.GetScrollPosition(D);
+            var M = Math.max(K.Y + (J.Height - height - 20) / 2, 0);
+            var N = Math.max(K.X + (J.Width - width - 20) / 2, 0);
+            var O = E.createElement('iframe');
+            FCKTools.ResetStyles(O);
+            O.src = FCKConfig.BasePath + 'fckdialog.html';
+            O.frameBorder = 0;
+            O.allowTransparency = true;
+            FCKDomTools.SetElementStyles(O, {
+                'position': (L) ? 'absolute' : 'fixed',
+                'top': M + 'px',
+                'left': N + 'px',
+                'width': width + 'px',
+                'height': height + 'px',
+                'zIndex': F()
+            });
+            O._DialogArguments = I;
+            E.body.appendChild(O);
+            O._ParentDialog = A;
+            A = O;
+        }, OnDialogClose: function (dialogWindow) {
+            var O = dialogWindow.frameElement;
+            FCKDomTools.RemoveNode(O);
+            if (O._ParentDialog) {
+                A = O._ParentDialog;
+                O._ParentDialog.contentWindow.SetEnabled(true);
+            } else {
+                if (!FCKBrowserInfo.IsIE) FCK.Focus();
+                this.HideMainCover();
+                setTimeout(function () {
+                    A = null;
+                }, 0);
+                FCK.ToolbarSet.CurrentInstance.Selection.Release();
+            }
+        }, DisplayMainCover: function () {
+            C = E.createElement('div');
+            FCKTools.ResetStyles(C);
+            FCKDomTools.SetElementStyles(C, {
+                'position': 'absolute',
+                'zIndex': F(),
+                'top': '0px',
+                'left': '0px',
+                'backgroundColor': FCKConfig.BackgroundBlockerColor
+            });
+            FCKDomTools.SetOpacity(C, FCKConfig.BackgroundBlockerOpacity);
+            if (FCKBrowserInfo.IsIE && !FCKBrowserInfo.IsIE7) {
+                var Q = E.createElement('iframe');
+                FCKTools.ResetStyles(Q);
+                Q.hideFocus = true;
+                Q.frameBorder = 0;
+                Q.src = FCKTools.GetVoidUrl();
+                FCKDomTools.SetElementStyles(Q, {
+                    'width': '100%',
+                    'height': '100%',
+                    'position': 'absolute',
+                    'left': '0px',
+                    'top': '0px',
+                    'filter': 'progid:DXImageTransform.Microsoft.Alpha(opacity=0)'
+                });
+                C.appendChild(Q);
+            }
+            FCKTools.AddEventListener(D, 'resize', G);
+            G();
+            E.body.appendChild(C);
+            FCKFocusManager.Lock();
+            var R = FCK.ToolbarSet.CurrentInstance.GetInstanceObject('frameElement');
+            R._fck_originalTabIndex = R.tabIndex;
+            R.tabIndex = -1;
+        }, HideMainCover: function () {
+            FCKDomTools.RemoveNode(C);
+            FCKFocusManager.Unlock();
+            var R = FCK.ToolbarSet.CurrentInstance.GetInstanceObject('frameElement');
+            R.tabIndex = R._fck_originalTabIndex;
+            FCKDomTools.ClearElementJSProperty(R, '_fck_originalTabIndex');
+        }, GetCover: function () {
+            return C;
+        }
+    };
+})();
+var FCKMenuItem = function (A, B, C, D, E, F) {
+    this.Name = B;
+    this.Label = C || B;
+    this.IsDisabled = E;
+    this.Icon = new FCKIcon(D);
+    this.SubMenu = new FCKMenuBlockPanel();
+    this.SubMenu.Parent = A;
+    this.SubMenu.OnClick = FCKTools.CreateEventListener(FCKMenuItem_SubMenu_OnClick, this);
+    this.CustomData = F;
+    if (FCK.IECleanup) FCK.IECleanup.AddItem(this, FCKMenuItem_Cleanup);
+};
+FCKMenuItem.prototype.AddItem = function (A, B, C, D, E) {
+    this.HasSubMenu = true;
+    return this.SubMenu.AddItem(A, B, C, D, E);
+};
+FCKMenuItem.prototype.AddSeparator = function () {
+    this.SubMenu.AddSeparator();
+};
+FCKMenuItem.prototype.Create = function (A) {
+    var B = this.HasSubMenu;
+    var C = FCKTools.GetElementDocument(A);
+    var r = this.MainElement = A.insertRow(-1);
+    r.className = this.IsDisabled ? 'MN_Item_Disabled' : 'MN_Item';
+    if (!this.IsDisabled) {
+        FCKTools.AddEventListenerEx(r, 'mouseover', FCKMenuItem_OnMouseOver, [this]);
+        FCKTools.AddEventListenerEx(r, 'click', FCKMenuItem_OnClick, [this]);
+        if (!B) FCKTools.AddEventListenerEx(r, 'mouseout', FCKMenuItem_OnMouseOut, [this]);
+    }
+    var D = r.insertCell(-1);
+    D.className = 'MN_Icon';
+    D.appendChild(this.Icon.CreateIconElement(C));
+    D = r.insertCell(-1);
+    D.className = 'MN_Label';
+    D.noWrap = true;
+    D.appendChild(C.createTextNode(this.Label));
+    D = r.insertCell(-1);
+    if (B) {
+        D.className = 'MN_Arrow';
+        var E = D.appendChild(C.createElement('IMG'));
+        E.src = FCK_IMAGES_PATH + 'arrow_' + FCKLang.Dir + '.gif';
+        E.width = 4;
+        E.height = 7;
+        this.SubMenu.Create();
+        this.SubMenu.Panel.OnHide = FCKTools.CreateEventListener(FCKMenuItem_SubMenu_OnHide, this);
+    }
+};
+FCKMenuItem.prototype.Activate = function () {
+    this.MainElement.className = 'MN_Item_Over';
+    if (this.HasSubMenu) {
+        this.SubMenu.Show(this.MainElement.offsetWidth + 2, -2, this.MainElement);
+    }
+    FCKTools.RunFunction(this.OnActivate, this);
+};
+FCKMenuItem.prototype.Deactivate = function () {
+    this.MainElement.className = 'MN_Item';
+    if (this.HasSubMenu) this.SubMenu.Hide();
+};
+function FCKMenuItem_SubMenu_OnClick(A, B) {
+    FCKTools.RunFunction(B.OnClick, B, [A]);
+}
+function FCKMenuItem_SubMenu_OnHide(A) {
+    A.Deactivate();
+}
+function FCKMenuItem_OnClick(A, B) {
+    if (B.HasSubMenu) B.Activate(); else {
+        B.Deactivate();
+        FCKTools.RunFunction(B.OnClick, B, [B]);
+    }
+}
+function FCKMenuItem_OnMouseOver(A, B) {
+    B.Activate();
+}
+function FCKMenuItem_OnMouseOut(A, B) {
+    B.Deactivate();
+}
+function FCKMenuItem_Cleanup() {
+    this.MainElement = null;
+}
+var FCKMenuBlock = function () {
+    this._Items = [];
+};
+FCKMenuBlock.prototype.Count = function () {
+    return this._Items.length;
+};
+FCKMenuBlock.prototype.AddItem = function (A, B, C, D, E) {
+    var F = new FCKMenuItem(this, A, B, C, D, E);
+    F.OnClick = FCKTools.CreateEventListener(FCKMenuBlock_Item_OnClick, this);
+    F.OnActivate = FCKTools.CreateEventListener(FCKMenuBlock_Item_OnActivate, this);
+    this._Items.push(F);
+    return F;
+};
+FCKMenuBlock.prototype.AddSeparator = function () {
+    this._Items.push(new FCKMenuSeparator());
+};
+FCKMenuBlock.prototype.RemoveAllItems = function () {
+    this._Items = [];
+    var A = this._ItemsTable;
+    if (A) {
+        while (A.rows.length > 0) A.deleteRow(0);
+    }
+};
+FCKMenuBlock.prototype.Create = function (A) {
+    if (!this._ItemsTable) {
+        if (FCK.IECleanup) FCK.IECleanup.AddItem(this, FCKMenuBlock_Cleanup);
+        this._Window = FCKTools.GetElementWindow(A);
+        var B = FCKTools.GetElementDocument(A);
+        var C = A.appendChild(B.createElement('table'));
+        C.cellPadding = 0;
+        C.cellSpacing = 0;
+        FCKTools.DisableSelection(C);
+        var D = C.insertRow(-1).insertCell(-1);
+        D.className = 'MN_Menu';
+        var E = this._ItemsTable = D.appendChild(B.createElement('table'));
+        E.cellPadding = 0;
+        E.cellSpacing = 0;
+    }
+    for (var i = 0; i < this._Items.length; i++) this._Items[i].Create(this._ItemsTable);
+};
+function FCKMenuBlock_Item_OnClick(A, B) {
+    if (B.Hide) B.Hide();
+    FCKTools.RunFunction(B.OnClick, B, [A]);
+}
+function FCKMenuBlock_Item_OnActivate(A) {
+    var B = A._ActiveItem;
+    if (B && B != this) {
+        if (!FCKBrowserInfo.IsIE && B.HasSubMenu && !this.HasSubMenu) {
+            A._Window.focus();
+            A.Panel.HasFocus = true;
+        }
+        B.Deactivate();
+    }
+    A._ActiveItem = this;
+}
+function FCKMenuBlock_Cleanup() {
+    this._Window = null;
+    this._ItemsTable = null;
+}
+var FCKMenuSeparator = function () {
+};
+FCKMenuSeparator.prototype.Create = function (A) {
+    var B = FCKTools.GetElementDocument(A);
+    var r = A.insertRow(-1);
+    var C = r.insertCell(-1);
+    C.className = 'MN_Separator MN_Icon';
+    C = r.insertCell(-1);
+    C.className = 'MN_Separator';
+    C.appendChild(B.createElement('DIV')).className = 'MN_Separator_Line';
+    C = r.insertCell(-1);
+    C.className = 'MN_Separator';
+    C.appendChild(B.createElement('DIV')).className = 'MN_Separator_Line';
+};
 var FCKMenuBlockPanel=function(){FCKMenuBlock.call(this);};FCKMenuBlockPanel.prototype=new FCKMenuBlock();FCKMenuBlockPanel.prototype.Create=function(){var A=this.Panel=(this.Parent&&this.Parent.Panel?this.Parent.Panel.CreateChildPanel():new FCKPanel());A.AppendStyleSheet(FCKConfig.SkinEditorCSS);FCKMenuBlock.prototype.Create.call(this,A.MainNode);};FCKMenuBlockPanel.prototype.Show=function(x,y,A){if (!this.Panel.CheckIsOpened()) this.Panel.Show(x,y,A);};FCKMenuBlockPanel.prototype.Hide=function(){if (this.Panel.CheckIsOpened()) this.Panel.Hide();};
-var FCKContextMenu=function(A,B){this.CtrlDisable=false;var C=this._Panel=new FCKPanel(A);C.AppendStyleSheet(FCKConfig.SkinEditorCSS);C.IsContextMenu=true;if (FCKBrowserInfo.IsGecko) C.Document.addEventListener('draggesture',function(e) {e.preventDefault();return false;},true);var D=this._MenuBlock=new FCKMenuBlock();D.Panel=C;D.OnClick=FCKTools.CreateEventListener(FCKContextMenu_MenuBlock_OnClick,this);this._Redraw=true;};FCKContextMenu.prototype.SetMouseClickWindow=function(A){if (!FCKBrowserInfo.IsIE){this._Document=A.document;if (FCKBrowserInfo.IsOpera&&!('oncontextmenu' in document.createElement('foo'))){this._Document.addEventListener('mousedown',FCKContextMenu_Document_OnMouseDown,false);this._Document.addEventListener('mouseup',FCKContextMenu_Document_OnMouseUp,false);};this._Document.addEventListener('contextmenu',FCKContextMenu_Document_OnContextMenu,false);}};FCKContextMenu.prototype.AddItem=function(A,B,C,D,E){var F=this._MenuBlock.AddItem(A,B,C,D,E);this._Redraw=true;return F;};FCKContextMenu.prototype.AddSeparator=function(){this._MenuBlock.AddSeparator();this._Redraw=true;};FCKContextMenu.prototype.RemoveAllItems=function(){this._MenuBlock.RemoveAllItems();this._Redraw=true;};FCKContextMenu.prototype.AttachToElement=function(A){if (FCKBrowserInfo.IsIE) FCKTools.AddEventListenerEx(A,'contextmenu',FCKContextMenu_AttachedElement_OnContextMenu,this);else A._FCKContextMenu=this;};function FCKContextMenu_Document_OnContextMenu(e){if (FCKConfig.BrowserContextMenu) return true;var A=e.target;while (A){if (A._FCKContextMenu){if (A._FCKContextMenu.CtrlDisable&&(e.ctrlKey||e.metaKey)) return true;FCKTools.CancelEvent(e);FCKContextMenu_AttachedElement_OnContextMenu(e,A._FCKContextMenu,A);return false;};A=A.parentNode;};return true;};var FCKContextMenu_OverrideButton;function FCKContextMenu_Document_OnMouseDown(e){if(!e||e.button!=2) return false;if (FCKConfig.BrowserContextMenu) return true;var A=e.target;while (A){if (A._FCKContextMenu){if (A._FCKContextMenu.CtrlDisable&&(e.ctrlKey||e.metaKey)) return true;var B=FCKContextMenu_OverrideButton;if(!B){var C=FCKTools.GetElementDocument(e.target);B=FCKContextMenu_OverrideButton=C.createElement('input');B.type='button';var D=C.createElement('p');C.body.appendChild(D);D.appendChild(B);};B.style.cssText='position:absolute;top:'+(e.clientY-2)+'px;left:'+(e.clientX-2)+'px;width:5px;height:5px;opacity:0.01';};A=A.parentNode;};return false;};function FCKContextMenu_Document_OnMouseUp(e){if (FCKConfig.BrowserContextMenu) return true;var A=FCKContextMenu_OverrideButton;if (A){var B=A.parentNode;B.parentNode.removeChild(B);FCKContextMenu_OverrideButton=undefined;if(e&&e.button==2){FCKContextMenu_Document_OnContextMenu(e);return false;}};return true;};function FCKContextMenu_AttachedElement_OnContextMenu(A,B,C){if ((B.CtrlDisable&&(A.ctrlKey||A.metaKey))||FCKConfig.BrowserContextMenu) return true;var D=C||this;if (B.OnBeforeOpen) B.OnBeforeOpen.call(B,D);if (B._MenuBlock.Count()==0) return false;if (B._Redraw){B._MenuBlock.Create(B._Panel.MainNode);B._Redraw=false;};FCKTools.DisableSelection(B._Panel.Document.body);var x=0;var y=0;if (FCKBrowserInfo.IsIE){x=A.screenX;y=A.screenY;}else if (FCKBrowserInfo.IsSafari){x=A.clientX;y=A.clientY;}else{x=A.pageX;y=A.pageY;};B._Panel.Show(x,y,A.currentTarget||null);return false;};function FCKContextMenu_MenuBlock_OnClick(A,B){B._Panel.Hide();FCKTools.RunFunction(B.OnItemClick,B,A);};
-FCK.ContextMenu={};FCK.ContextMenu.Listeners=[];FCK.ContextMenu.RegisterListener=function(A){if (A) this.Listeners.push(A);};function FCK_ContextMenu_Init(){var A=FCK.ContextMenu._InnerContextMenu=new FCKContextMenu(FCKBrowserInfo.IsIE?window:window.parent,FCKLang.Dir);A.CtrlDisable=FCKConfig.BrowserContextMenuOnCtrl;A.OnBeforeOpen=FCK_ContextMenu_OnBeforeOpen;A.OnItemClick=FCK_ContextMenu_OnItemClick;var B=FCK.ContextMenu;for (var i=0;i<FCKConfig.ContextMenu.length;i++) B.RegisterListener(FCK_ContextMenu_GetListener(FCKConfig.ContextMenu[i]));};function FCK_ContextMenu_GetListener(A){switch (A){case 'Generic':return {AddItems:function(menu,tag,tagName){menu.AddItem('Cut',FCKLang.Cut,7,FCKCommands.GetCommand('Cut').GetState()==-1);menu.AddItem('Copy',FCKLang.Copy,8,FCKCommands.GetCommand('Copy').GetState()==-1);menu.AddItem('Paste',FCKLang.Paste,9,FCKCommands.GetCommand('Paste').GetState()==-1);}};case 'Table':return {AddItems:function(menu,tag,tagName){var B=(tagName=='TABLE');var C=(!B&&FCKSelection.HasAncestorNode('TABLE'));if (C){menu.AddSeparator();var D=menu.AddItem('Cell',FCKLang.CellCM);D.AddItem('TableInsertCellBefore',FCKLang.InsertCellBefore,69);D.AddItem('TableInsertCellAfter',FCKLang.InsertCellAfter,58);D.AddItem('TableDeleteCells',FCKLang.DeleteCells,59);if (FCKBrowserInfo.IsGecko) D.AddItem('TableMergeCells',FCKLang.MergeCells,60,FCKCommands.GetCommand('TableMergeCells').GetState()==-1);else{D.AddItem('TableMergeRight',FCKLang.MergeRight,60,FCKCommands.GetCommand('TableMergeRight').GetState()==-1);D.AddItem('TableMergeDown',FCKLang.MergeDown,60,FCKCommands.GetCommand('TableMergeDown').GetState()==-1);};D.AddItem('TableHorizontalSplitCell',FCKLang.HorizontalSplitCell,61,FCKCommands.GetCommand('TableHorizontalSplitCell').GetState()==-1);D.AddItem('TableVerticalSplitCell',FCKLang.VerticalSplitCell,61,FCKCommands.GetCommand('TableVerticalSplitCell').GetState()==-1);D.AddSeparator();D.AddItem('TableCellProp',FCKLang.CellProperties,57,FCKCommands.GetCommand('TableCellProp').GetState()==-1);menu.AddSeparator();D=menu.AddItem('Row',FCKLang.RowCM);D.AddItem('TableInsertRowBefore',FCKLang.InsertRowBefore,70);D.AddItem('TableInsertRowAfter',FCKLang.InsertRowAfter,62);D.AddItem('TableDeleteRows',FCKLang.DeleteRows,63);menu.AddSeparator();D=menu.AddItem('Column',FCKLang.ColumnCM);D.AddItem('TableInsertColumnBefore',FCKLang.InsertColumnBefore,71);D.AddItem('TableInsertColumnAfter',FCKLang.InsertColumnAfter,64);D.AddItem('TableDeleteColumns',FCKLang.DeleteColumns,65);};if (B||C){menu.AddSeparator();menu.AddItem('TableDelete',FCKLang.TableDelete);menu.AddItem('TableProp',FCKLang.TableProperties,39);}}};case 'Link':return {AddItems:function(menu,tag,tagName){var E=(tagName=='A'||FCKSelection.HasAncestorNode('A'));if (E||FCK.GetNamedCommandState('Unlink')!=-1){var F=FCKSelection.MoveToAncestorNode('A');var G=(F&&F.name.length>0&&F.href.length==0);if (G) return;menu.AddSeparator();menu.AddItem('VisitLink',FCKLang.VisitLink);menu.AddSeparator();if (E) menu.AddItem('Link',FCKLang.EditLink,34);menu.AddItem('Unlink',FCKLang.RemoveLink,35);}}};case 'Image':return {AddItems:function(menu,tag,tagName){if (tagName=='IMG'&&!tag.getAttribute('_fckfakelement')){menu.AddSeparator();menu.AddItem('Image',FCKLang.ImageProperties,37);}}};case 'Anchor':return {AddItems:function(menu,tag,tagName){var F=FCKSelection.MoveToAncestorNode('A');var G=(F&&F.name.length>0);if (G||(tagName=='IMG'&&tag.getAttribute('_fckanchor'))){menu.AddSeparator();menu.AddItem('Anchor',FCKLang.AnchorProp,36);menu.AddItem('AnchorDelete',FCKLang.AnchorDelete);}}};case 'Flash':return {AddItems:function(menu,tag,tagName){if (tagName=='IMG'&&tag.getAttribute('_fckflash')){menu.AddSeparator();menu.AddItem('Flash',FCKLang.FlashProperties,38);}}};case 'Form':return {AddItems:function(menu,tag,tagName){if (FCKSelection.HasAncestorNode('FORM')){menu.AddSeparator();menu.AddItem('Form',FCKLang.FormProp,48);}}};case 'Checkbox':return {AddItems:function(menu,tag,tagName){if (tagName=='INPUT'&&tag.type=='checkbox'){menu.AddSeparator();menu.AddItem('Checkbox',FCKLang.CheckboxProp,49);}}};case 'Radio':return {AddItems:function(menu,tag,tagName){if (tagName=='INPUT'&&tag.type=='radio'){menu.AddSeparator();menu.AddItem('Radio',FCKLang.RadioButtonProp,50);}}};case 'TextField':return {AddItems:function(menu,tag,tagName){if (tagName=='INPUT'&&(tag.type=='text'||tag.type=='password')){menu.AddSeparator();menu.AddItem('TextField',FCKLang.TextFieldProp,51);}}};case 'HiddenField':return {AddItems:function(menu,tag,tagName){if (tagName=='IMG'&&tag.getAttribute('_fckinputhidden')){menu.AddSeparator();menu.AddItem('HiddenField',FCKLang.HiddenFieldProp,56);}}};case 'ImageButton':return {AddItems:function(menu,tag,tagName){if (tagName=='INPUT'&&tag.type=='image'){menu.AddSeparator();menu.AddItem('ImageButton',FCKLang.ImageButtonProp,55);}}};case 'Button':return {AddItems:function(menu,tag,tagName){if (tagName=='INPUT'&&(tag.type=='button'||tag.type=='submit'||tag.type=='reset')){menu.AddSeparator();menu.AddItem('Button',FCKLang.ButtonProp,54);}}};case 'Select':return {AddItems:function(menu,tag,tagName){if (tagName=='SELECT'){menu.AddSeparator();menu.AddItem('Select',FCKLang.SelectionFieldProp,53);}}};case 'Textarea':return {AddItems:function(menu,tag,tagName){if (tagName=='TEXTAREA'){menu.AddSeparator();menu.AddItem('Textarea',FCKLang.TextareaProp,52);}}};case 'BulletedList':return {AddItems:function(menu,tag,tagName){if (FCKSelection.HasAncestorNode('UL')){menu.AddSeparator();menu.AddItem('BulletedList',FCKLang.BulletedListProp,27);}}};case 'NumberedList':return {AddItems:function(menu,tag,tagName){if (FCKSelection.HasAncestorNode('OL')){menu.AddSeparator();menu.AddItem('NumberedList',FCKLang.NumberedListProp,26);}}};case 'DivContainer':return {AddItems:function(menu,tag,tagName){var J=FCKDomTools.GetSelectedDivContainers();if (J.length>0){menu.AddSeparator();menu.AddItem('EditDiv',FCKLang.EditDiv,75);menu.AddItem('DeleteDiv',FCKLang.DeleteDiv,76);}}};};return null;};function FCK_ContextMenu_OnBeforeOpen(){FCK.Events.FireEvent('OnSelectionChange');var A,sTagName;if ((A=FCKSelection.GetSelectedElement())) sTagName=A.tagName;var B=FCK.ContextMenu._InnerContextMenu;B.RemoveAllItems();var C=FCK.ContextMenu.Listeners;for (var i=0;i<C.length;i++) C[i].AddItems(B,A,sTagName);};function FCK_ContextMenu_OnItemClick(A){if (!FCKBrowserInfo.IsIE) FCK.Focus();FCKCommands.GetCommand(A.Name).Execute(A.CustomData);};
-var FCKHtmlIterator=function(A){this._sourceHtml=A;};FCKHtmlIterator.prototype={Next:function(){var A=this._sourceHtml;if (A==null) return null;var B=FCKRegexLib.HtmlTag.exec(A);var C=false;var D="";if (B){if (B.index>0){D=A.substr(0,B.index);this._sourceHtml=A.substr(B.index);}else{C=true;D=B[0];this._sourceHtml=A.substr(B[0].length);}}else{D=A;this._sourceHtml=null;};return { 'isTag':C,'value':D };},Each:function(A){var B;while ((B=this.Next())) A(B.isTag,B.value);}};var FCKHtmlIterator=function(A){this._sourceHtml=A;};FCKHtmlIterator.prototype={Next:function(){var A=this._sourceHtml;if (A==null) return null;var B=FCKRegexLib.HtmlTag.exec(A);var C=false;var D="";if (B){if (B.index>0){D=A.substr(0,B.index);this._sourceHtml=A.substr(B.index);}else{C=true;D=B[0];this._sourceHtml=A.substr(B[0].length);}}else{D=A;this._sourceHtml=null;};return { 'isTag':C,'value':D };},Each:function(A){var B;while ((B=this.Next())) A(B.isTag,B.value);}};
-var FCKPlugin=function(A,B,C){this.Name=A;this.BasePath=C?C:FCKConfig.PluginsPath;this.Path=this.BasePath+A+'/';if (!B||B.length==0) this.AvailableLangs=[];else this.AvailableLangs=B.split(',');};FCKPlugin.prototype.Load=function(){if (this.AvailableLangs.length>0){var A;if (this.AvailableLangs.IndexOf(FCKLanguageManager.ActiveLanguage.Code)>=0) A=FCKLanguageManager.ActiveLanguage.Code;else A=this.AvailableLangs[0];LoadScript(this.Path+'lang/'+A+'.js');};LoadScript(this.Path+'fckplugin.js');};
-var FCKPlugins=FCK.Plugins={};FCKPlugins.ItemsCount=0;FCKPlugins.Items={};FCKPlugins.Load=function(){var A=FCKPlugins.Items;for (var i=0;i<FCKConfig.Plugins.Items.length;i++){var B=FCKConfig.Plugins.Items[i];var C=A[B[0]]=new FCKPlugin(B[0],B[1],B[2]);FCKPlugins.ItemsCount++;};for (var s in A) A[s].Load();FCKPlugins.Load=null;};
+var FCKContextMenu = function (A, B) {
+    this.CtrlDisable = false;
+    var C = this._Panel = new FCKPanel(A);
+    C.AppendStyleSheet(FCKConfig.SkinEditorCSS);
+    C.IsContextMenu = true;
+    if (FCKBrowserInfo.IsGecko) C.Document.addEventListener('draggesture', function (e) {
+        e.preventDefault();
+        return false;
+    }, true);
+    var D = this._MenuBlock = new FCKMenuBlock();
+    D.Panel = C;
+    D.OnClick = FCKTools.CreateEventListener(FCKContextMenu_MenuBlock_OnClick, this);
+    this._Redraw = true;
+};
+FCKContextMenu.prototype.SetMouseClickWindow = function (A) {
+    if (!FCKBrowserInfo.IsIE) {
+        this._Document = A.document;
+        if (FCKBrowserInfo.IsOpera && !('oncontextmenu' in document.createElement('foo'))) {
+            this._Document.addEventListener('mousedown', FCKContextMenu_Document_OnMouseDown, false);
+            this._Document.addEventListener('mouseup', FCKContextMenu_Document_OnMouseUp, false);
+        }
+        this._Document.addEventListener('contextmenu', FCKContextMenu_Document_OnContextMenu, false);
+    }
+};
+FCKContextMenu.prototype.AddItem = function (A, B, C, D, E) {
+    var F = this._MenuBlock.AddItem(A, B, C, D, E);
+    this._Redraw = true;
+    return F;
+};
+FCKContextMenu.prototype.AddSeparator = function () {
+    this._MenuBlock.AddSeparator();
+    this._Redraw = true;
+};
+FCKContextMenu.prototype.RemoveAllItems = function () {
+    this._MenuBlock.RemoveAllItems();
+    this._Redraw = true;
+};
+FCKContextMenu.prototype.AttachToElement = function (A) {
+    if (FCKBrowserInfo.IsIE) FCKTools.AddEventListenerEx(A, 'contextmenu', FCKContextMenu_AttachedElement_OnContextMenu, this); else A._FCKContextMenu = this;
+};
+function FCKContextMenu_Document_OnContextMenu(e) {
+    if (FCKConfig.BrowserContextMenu) return true;
+    var A = e.target;
+    while (A) {
+        if (A._FCKContextMenu) {
+            if (A._FCKContextMenu.CtrlDisable && (e.ctrlKey || e.metaKey)) return true;
+            FCKTools.CancelEvent(e);
+            FCKContextMenu_AttachedElement_OnContextMenu(e, A._FCKContextMenu, A);
+            return false;
+        }
+        A = A.parentNode;
+    }
+    return true;
+}
+var FCKContextMenu_OverrideButton;
+function FCKContextMenu_Document_OnMouseDown(e) {
+    if (!e || e.button != 2) return false;
+    if (FCKConfig.BrowserContextMenu) return true;
+    var A = e.target;
+    while (A) {
+        if (A._FCKContextMenu) {
+            if (A._FCKContextMenu.CtrlDisable && (e.ctrlKey || e.metaKey)) return true;
+            var B = FCKContextMenu_OverrideButton;
+            if (!B) {
+                var C = FCKTools.GetElementDocument(e.target);
+                B = FCKContextMenu_OverrideButton = C.createElement('input');
+                B.type = 'button';
+                var D = C.createElement('p');
+                C.body.appendChild(D);
+                D.appendChild(B);
+            }
+            B.style.cssText = 'position:absolute;top:' + (e.clientY - 2) + 'px;left:' + (e.clientX - 2) + 'px;width:5px;height:5px;opacity:0.01';
+        }
+        A = A.parentNode;
+    }
+    return false;
+}
+function FCKContextMenu_Document_OnMouseUp(e) {
+    if (FCKConfig.BrowserContextMenu) return true;
+    var A = FCKContextMenu_OverrideButton;
+    if (A) {
+        var B = A.parentNode;
+        B.parentNode.removeChild(B);
+        FCKContextMenu_OverrideButton = undefined;
+        if (e && e.button == 2) {
+            FCKContextMenu_Document_OnContextMenu(e);
+            return false;
+        }
+    }
+    return true;
+}
+function FCKContextMenu_AttachedElement_OnContextMenu(A, B, C) {
+    if ((B.CtrlDisable && (A.ctrlKey || A.metaKey)) || FCKConfig.BrowserContextMenu) return true;
+    var D = C || this;
+    if (B.OnBeforeOpen) B.OnBeforeOpen.call(B, D);
+    if (B._MenuBlock.Count() == 0) return false;
+    if (B._Redraw) {
+        B._MenuBlock.Create(B._Panel.MainNode);
+        B._Redraw = false;
+    }
+    FCKTools.DisableSelection(B._Panel.Document.body);
+    var x = 0;
+    var y = 0;
+    if (FCKBrowserInfo.IsIE) {
+        x = A.screenX;
+        y = A.screenY;
+    } else if (FCKBrowserInfo.IsSafari) {
+        x = A.clientX;
+        y = A.clientY;
+    } else {
+        x = A.pageX;
+        y = A.pageY;
+    }
+    B._Panel.Show(x, y, A.currentTarget || null);
+    return false;
+}
+function FCKContextMenu_MenuBlock_OnClick(A, B) {
+    B._Panel.Hide();
+    FCKTools.RunFunction(B.OnItemClick, B, A);
+}
+FCK.ContextMenu = {};
+FCK.ContextMenu.Listeners = [];
+FCK.ContextMenu.RegisterListener = function (A) {
+    if (A) this.Listeners.push(A);
+};
+function FCK_ContextMenu_Init() {
+    var A = FCK.ContextMenu._InnerContextMenu = new FCKContextMenu(FCKBrowserInfo.IsIE ? window : window.parent, FCKLang.Dir);
+    A.CtrlDisable = FCKConfig.BrowserContextMenuOnCtrl;
+    A.OnBeforeOpen = FCK_ContextMenu_OnBeforeOpen;
+    A.OnItemClick = FCK_ContextMenu_OnItemClick;
+    var B = FCK.ContextMenu;
+    for (var i = 0; i < FCKConfig.ContextMenu.length; i++) B.RegisterListener(FCK_ContextMenu_GetListener(FCKConfig.ContextMenu[i]));
+}
+function FCK_ContextMenu_GetListener(A) {
+    switch (A) {
+        case 'Generic':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    menu.AddItem('Cut', FCKLang.Cut, 7, FCKCommands.GetCommand('Cut').GetState() == -1);
+                    menu.AddItem('Copy', FCKLang.Copy, 8, FCKCommands.GetCommand('Copy').GetState() == -1);
+                    menu.AddItem('Paste', FCKLang.Paste, 9, FCKCommands.GetCommand('Paste').GetState() == -1);
+                }
+            };
+        case 'Table':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    var B = (tagName == 'TABLE');
+                    var C = (!B && FCKSelection.HasAncestorNode('TABLE'));
+                    if (C) {
+                        menu.AddSeparator();
+                        var D = menu.AddItem('Cell', FCKLang.CellCM);
+                        D.AddItem('TableInsertCellBefore', FCKLang.InsertCellBefore, 69);
+                        D.AddItem('TableInsertCellAfter', FCKLang.InsertCellAfter, 58);
+                        D.AddItem('TableDeleteCells', FCKLang.DeleteCells, 59);
+                        if (FCKBrowserInfo.IsGecko) D.AddItem('TableMergeCells', FCKLang.MergeCells, 60, FCKCommands.GetCommand('TableMergeCells').GetState() == -1); else {
+                            D.AddItem('TableMergeRight', FCKLang.MergeRight, 60, FCKCommands.GetCommand('TableMergeRight').GetState() == -1);
+                            D.AddItem('TableMergeDown', FCKLang.MergeDown, 60, FCKCommands.GetCommand('TableMergeDown').GetState() == -1);
+                        }
+                        D.AddItem('TableHorizontalSplitCell', FCKLang.HorizontalSplitCell, 61, FCKCommands.GetCommand('TableHorizontalSplitCell').GetState() == -1);
+                        D.AddItem('TableVerticalSplitCell', FCKLang.VerticalSplitCell, 61, FCKCommands.GetCommand('TableVerticalSplitCell').GetState() == -1);
+                        D.AddSeparator();
+                        D.AddItem('TableCellProp', FCKLang.CellProperties, 57, FCKCommands.GetCommand('TableCellProp').GetState() == -1);
+                        menu.AddSeparator();
+                        D = menu.AddItem('Row', FCKLang.RowCM);
+                        D.AddItem('TableInsertRowBefore', FCKLang.InsertRowBefore, 70);
+                        D.AddItem('TableInsertRowAfter', FCKLang.InsertRowAfter, 62);
+                        D.AddItem('TableDeleteRows', FCKLang.DeleteRows, 63);
+                        menu.AddSeparator();
+                        D = menu.AddItem('Column', FCKLang.ColumnCM);
+                        D.AddItem('TableInsertColumnBefore', FCKLang.InsertColumnBefore, 71);
+                        D.AddItem('TableInsertColumnAfter', FCKLang.InsertColumnAfter, 64);
+                        D.AddItem('TableDeleteColumns', FCKLang.DeleteColumns, 65);
+                    }
+                    if (B || C) {
+                        menu.AddSeparator();
+                        menu.AddItem('TableDelete', FCKLang.TableDelete);
+                        menu.AddItem('TableProp', FCKLang.TableProperties, 39);
+                    }
+                }
+            };
+        case 'Link':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    var E = (tagName == 'A' || FCKSelection.HasAncestorNode('A'));
+                    if (E || FCK.GetNamedCommandState('Unlink') != -1) {
+                        var F = FCKSelection.MoveToAncestorNode('A');
+                        var G = (F && F.name.length > 0 && F.href.length == 0);
+                        if (G) return;
+                        menu.AddSeparator();
+                        menu.AddItem('VisitLink', FCKLang.VisitLink);
+                        menu.AddSeparator();
+                        if (E) menu.AddItem('Link', FCKLang.EditLink, 34);
+                        menu.AddItem('Unlink', FCKLang.RemoveLink, 35);
+                    }
+                }
+            };
+        case 'Image':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'IMG' && !tag.getAttribute('_fckfakelement')) {
+                        menu.AddSeparator();
+                        menu.AddItem('Image', FCKLang.ImageProperties, 37);
+                    }
+                }
+            };
+        case 'Anchor':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    var F = FCKSelection.MoveToAncestorNode('A');
+                    var G = (F && F.name.length > 0);
+                    if (G || (tagName == 'IMG' && tag.getAttribute('_fckanchor'))) {
+                        menu.AddSeparator();
+                        menu.AddItem('Anchor', FCKLang.AnchorProp, 36);
+                        menu.AddItem('AnchorDelete', FCKLang.AnchorDelete);
+                    }
+                }
+            };
+        case 'Flash':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'IMG' && tag.getAttribute('_fckflash')) {
+                        menu.AddSeparator();
+                        menu.AddItem('Flash', FCKLang.FlashProperties, 38);
+                    }
+                }
+            };
+        case 'Form':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (FCKSelection.HasAncestorNode('FORM')) {
+                        menu.AddSeparator();
+                        menu.AddItem('Form', FCKLang.FormProp, 48);
+                    }
+                }
+            };
+        case 'Checkbox':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'INPUT' && tag.type == 'checkbox') {
+                        menu.AddSeparator();
+                        menu.AddItem('Checkbox', FCKLang.CheckboxProp, 49);
+                    }
+                }
+            };
+        case 'Radio':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'INPUT' && tag.type == 'radio') {
+                        menu.AddSeparator();
+                        menu.AddItem('Radio', FCKLang.RadioButtonProp, 50);
+                    }
+                }
+            };
+        case 'TextField':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'INPUT' && (tag.type == 'text' || tag.type == 'password')) {
+                        menu.AddSeparator();
+                        menu.AddItem('TextField', FCKLang.TextFieldProp, 51);
+                    }
+                }
+            };
+        case 'HiddenField':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'IMG' && tag.getAttribute('_fckinputhidden')) {
+                        menu.AddSeparator();
+                        menu.AddItem('HiddenField', FCKLang.HiddenFieldProp, 56);
+                    }
+                }
+            };
+        case 'ImageButton':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'INPUT' && tag.type == 'image') {
+                        menu.AddSeparator();
+                        menu.AddItem('ImageButton', FCKLang.ImageButtonProp, 55);
+                    }
+                }
+            };
+        case 'Button':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'INPUT' && (tag.type == 'button' || tag.type == 'submit' || tag.type == 'reset')) {
+                        menu.AddSeparator();
+                        menu.AddItem('Button', FCKLang.ButtonProp, 54);
+                    }
+                }
+            };
+        case 'Select':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'SELECT') {
+                        menu.AddSeparator();
+                        menu.AddItem('Select', FCKLang.SelectionFieldProp, 53);
+                    }
+                }
+            };
+        case 'Textarea':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (tagName == 'TEXTAREA') {
+                        menu.AddSeparator();
+                        menu.AddItem('Textarea', FCKLang.TextareaProp, 52);
+                    }
+                }
+            };
+        case 'BulletedList':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (FCKSelection.HasAncestorNode('UL')) {
+                        menu.AddSeparator();
+                        menu.AddItem('BulletedList', FCKLang.BulletedListProp, 27);
+                    }
+                }
+            };
+        case 'NumberedList':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    if (FCKSelection.HasAncestorNode('OL')) {
+                        menu.AddSeparator();
+                        menu.AddItem('NumberedList', FCKLang.NumberedListProp, 26);
+                    }
+                }
+            };
+        case 'DivContainer':
+            return {
+                AddItems: function (menu, tag, tagName) {
+                    var J = FCKDomTools.GetSelectedDivContainers();
+                    if (J.length > 0) {
+                        menu.AddSeparator();
+                        menu.AddItem('EditDiv', FCKLang.EditDiv, 75);
+                        menu.AddItem('DeleteDiv', FCKLang.DeleteDiv, 76);
+                    }
+                }
+            };
+    }
+    return null;
+}
+function FCK_ContextMenu_OnBeforeOpen() {
+    FCK.Events.FireEvent('OnSelectionChange');
+    var A, sTagName;
+    if ((A = FCKSelection.GetSelectedElement())) sTagName = A.tagName;
+    var B = FCK.ContextMenu._InnerContextMenu;
+    B.RemoveAllItems();
+    var C = FCK.ContextMenu.Listeners;
+    for (var i = 0; i < C.length; i++) C[i].AddItems(B, A, sTagName);
+}
+function FCK_ContextMenu_OnItemClick(A) {
+    if (!FCKBrowserInfo.IsIE) FCK.Focus();
+    FCKCommands.GetCommand(A.Name).Execute(A.CustomData);
+}
+var FCKHtmlIterator = function (A) {
+    this._sourceHtml = A;
+};
+FCKHtmlIterator.prototype = {
+    Next: function () {
+        var A = this._sourceHtml;
+        if (A == null) return null;
+        var B = FCKRegexLib.HtmlTag.exec(A);
+        var C = false;
+        var D = "";
+        if (B) {
+            if (B.index > 0) {
+                D = A.substr(0, B.index);
+                this._sourceHtml = A.substr(B.index);
+            } else {
+                C = true;
+                D = B[0];
+                this._sourceHtml = A.substr(B[0].length);
+            }
+        } else {
+            D = A;
+            this._sourceHtml = null;
+        }
+        return {'isTag': C, 'value': D};
+    }, Each: function (A) {
+        var B;
+        while ((B = this.Next())) A(B.isTag, B.value);
+    }
+};
+var FCKHtmlIterator = function (A) {
+    this._sourceHtml = A;
+};
+FCKHtmlIterator.prototype = {
+    Next: function () {
+        var A = this._sourceHtml;
+        if (A == null) return null;
+        var B = FCKRegexLib.HtmlTag.exec(A);
+        var C = false;
+        var D = "";
+        if (B) {
+            if (B.index > 0) {
+                D = A.substr(0, B.index);
+                this._sourceHtml = A.substr(B.index);
+            } else {
+                C = true;
+                D = B[0];
+                this._sourceHtml = A.substr(B[0].length);
+            }
+        } else {
+            D = A;
+            this._sourceHtml = null;
+        }
+        return {'isTag': C, 'value': D};
+    }, Each: function (A) {
+        var B;
+        while ((B = this.Next())) A(B.isTag, B.value);
+    }
+};
+var FCKPlugin = function (A, B, C) {
+    this.Name = A;
+    this.BasePath = C ? C : FCKConfig.PluginsPath;
+    this.Path = this.BasePath + A + '/';
+    if (!B || B.length == 0) this.AvailableLangs = []; else this.AvailableLangs = B.split(',');
+};
+FCKPlugin.prototype.Load = function () {
+    if (this.AvailableLangs.length > 0) {
+        var A;
+        if (this.AvailableLangs.IndexOf(FCKLanguageManager.ActiveLanguage.Code) >= 0) A = FCKLanguageManager.ActiveLanguage.Code; else A = this.AvailableLangs[0];
+        LoadScript(this.Path + 'lang/' + A + '.js');
+    }
+    LoadScript(this.Path + 'fckplugin.js');
+};
+var FCKPlugins = FCK.Plugins = {};
+FCKPlugins.ItemsCount = 0;
+FCKPlugins.Items = {};
+FCKPlugins.Load = function () {
+    var A = FCKPlugins.Items;
+    for (var i = 0; i < FCKConfig.Plugins.Items.length; i++) {
+        var B = FCKConfig.Plugins.Items[i];
+        var C = A[B[0]] = new FCKPlugin(B[0], B[1], B[2]);
+        FCKPlugins.ItemsCount++;
+    }
+    for (var s in A) A[s].Load();
+    FCKPlugins.Load = null;
+};

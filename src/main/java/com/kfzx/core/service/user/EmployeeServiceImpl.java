@@ -13,8 +13,7 @@ import com.kfzx.core.dao.user.EmployeeDao;
 import com.kfzx.core.query.user.EmployeeQuery;
 /**
  * 员工
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional

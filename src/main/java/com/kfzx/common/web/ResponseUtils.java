@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
  * json
  * xml
  * text
- * @author lx
+ * @author
  *
  */
 public class ResponseUtils {

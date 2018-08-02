@@ -6,9 +6,7 @@ import java.util.List;
 import com.kfzx.core.query.BaseQuery;
 
 /**
- * 
- * @author lixu
- * @Date [2014-3-28 下午05:58:00]
+ *
  */
 public class FeatureQuery extends BaseQuery {
 	/**

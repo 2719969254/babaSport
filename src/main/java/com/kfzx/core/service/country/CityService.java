@@ -8,8 +8,7 @@ import com.kfzx.core.query.country.CityQuery;
 
 /**
  * 
- * @author lixu
- * @Date [2014-3-28 下午01:50:28]
+@author
  */
 public interface CityService {
 	/**
@@ -17,38 +16,38 @@ public interface CityService {
 	 * 
 	 * @return
 	 */
-	public Integer addCity(City city);
+    Integer addCity(City city);
 
 	/**
 	 * 根据主键查询
 	 */
-	public City getCityByKey(Integer id);
+    City getCityByKey(Integer id);
 
 	/**
 	 * 根据主键批量查询
 	 */
-	public List<City> getCitysByKeys(List<Integer> idList);
+    List<City> getCitysByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKey(Integer id);
+    Integer deleteByKey(Integer id);
 
 	/**
 	 * 根据主键批量删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKeys(List<Integer> idList);
+    Integer deleteByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键更新
 	 * 
 	 * @return
 	 */
-	public Integer updateCityByKey(City city);
+    Integer updateCityByKey(City city);
 
 	/**
 	 * 根据条件查询分页查询
@@ -57,7 +56,7 @@ public interface CityService {
 	 *            查询条件
 	 * @return
 	 */
-	public Pagination getCityListWithPage(CityQuery cityQuery);
+    Pagination getCityListWithPage(CityQuery cityQuery);
 
 	/**
 	 * 根据条件查询
@@ -66,5 +65,5 @@ public interface CityService {
 	 *            查询条件
 	 * @return
 	 */
-	public List<City> getCityList(CityQuery cityQuery);
+    List<City> getCityList(CityQuery cityQuery);
 }

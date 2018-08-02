@@ -7,8 +7,7 @@ import com.kfzx.core.query.BaseQuery;
 
 /**
  * 地址条件对象
- * @author lixu
- * @Date [2014-3-28 下午05:58:00]
+
  */
 public class AddrQuery extends BaseQuery {
 	/**

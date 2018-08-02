@@ -4,7 +4,6 @@ import java.util.Date;
 
 /**
  * 测试JavaBean
- * @author lx
  *
  */
 public class TestTb {

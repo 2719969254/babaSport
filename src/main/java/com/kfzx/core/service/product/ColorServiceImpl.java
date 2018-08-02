@@ -13,8 +13,7 @@ import com.kfzx.core.dao.product.ColorDao;
 import com.kfzx.core.query.product.ColorQuery;
 /**
  * 颜色
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional

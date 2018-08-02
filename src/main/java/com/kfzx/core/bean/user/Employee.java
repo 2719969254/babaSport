@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 /**
  * 员工
- * @author lixu
- * @Date [2014-3-28 下午04:38:53]
  */
 public class Employee implements Serializable {
 	/**

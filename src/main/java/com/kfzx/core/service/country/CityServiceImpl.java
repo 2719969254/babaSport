@@ -13,12 +13,11 @@ import com.kfzx.core.dao.country.CityDao;
 import com.kfzx.core.query.country.CityQuery;
 /**
  * 市
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional
-public class CityServiceImpl implements com.kfzx.core.service.country.CityService {
+public class CityServiceImpl implements CityService {
 
 	@Resource
 	CityDao cityDao;

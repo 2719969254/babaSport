@@ -4,5 +4,5 @@ import com.kfzx.core.bean.TestTb;
 
 public interface TestTbService {
 
-	public void addTestTb(TestTb testTb);
+	void addTestTb(TestTb testTb);
 }

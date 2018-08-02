@@ -11,7 +11,7 @@ function checkAll(){
 }
 //批量删除到垃圾箱
 function toTrash(){
-	var ids=new Array();
+	var ids=[];
 	$("input[name='ids']").each(function(i){
 		if($(this).attr("checked")){
 			ids.push($(this).val());
@@ -58,7 +58,7 @@ function forward(){
 	$("#jvForm").submit();
 }
 function empty(){
-	var ids=new Array();
+	var ids=[];
 	$("input[name='ids']").each(function(i){
 		if($(this).attr("checked")){
 			ids.push($(this).val());
@@ -99,7 +99,7 @@ function emptySingle(id){
 		}, "json");
 }
 function revert(){
-	var ids=new Array();
+	var ids=[];
 	$("input[name='ids']").each(function(i){
 		if($(this).attr("checked")){
 			ids.push($(this).val());

@@ -166,7 +166,7 @@
 					<li>
 						<label for="residence"><samp>*</samp>地　　址：</label>
 						<span class="word">
-						<select name="">
+						<select name="" id="province">
 							<option value="" selected>省/直辖市</option>
 							<option value=""></option>
 						</select><select name="">

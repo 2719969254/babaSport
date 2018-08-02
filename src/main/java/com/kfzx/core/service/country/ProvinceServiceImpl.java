@@ -13,8 +13,7 @@ import com.kfzx.core.dao.country.ProvinceDao;
 import com.kfzx.core.query.country.ProvinceQuery;
 /**
  * 省
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional

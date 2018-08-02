@@ -3,13 +3,13 @@ package com.kfzx.core.service.order;
 import java.util.List;
 
 import cn.itcast.common.page.Pagination;
+import com.kfzx.core.bean.BuyCart;
 import com.kfzx.core.bean.order.Order;
 import com.kfzx.core.query.order.OrderQuery;
 
 /**
  * 
- * @author lixu
- * @Date [2014-3-28 下午01:50:28]
+@author
  */
 public interface OrderService {
 	/**
@@ -17,38 +17,38 @@ public interface OrderService {
 	 * 
 	 * @return
 	 */
-	public Integer addOrder(Order order);
+    Integer addOrder(Order order, BuyCart buyCart);
 
 	/**
 	 * 根据主键查询
 	 */
-	public Order getOrderByKey(Integer id);
+    Order getOrderByKey(Integer id);
 
 	/**
 	 * 根据主键批量查询
 	 */
-	public List<Order> getOrdersByKeys(List<Integer> idList);
+    List<Order> getOrdersByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKey(Integer id);
+    Integer deleteByKey(Integer id);
 
 	/**
 	 * 根据主键批量删除
 	 * 
 	 * @return
 	 */
-	public Integer deleteByKeys(List<Integer> idList);
+    Integer deleteByKeys(List<Integer> idList);
 
 	/**
 	 * 根据主键更新
 	 * 
 	 * @return
 	 */
-	public Integer updateOrderByKey(Order order);
+    Integer updateOrderByKey(Order order);
 
 	/**
 	 * 根据条件查询分页查询
@@ -57,7 +57,7 @@ public interface OrderService {
 	 *            查询条件
 	 * @return
 	 */
-	public Pagination getOrderListWithPage(OrderQuery orderQuery);
+    Pagination getOrderListWithPage(OrderQuery orderQuery);
 
 	/**
 	 * 根据条件查询
@@ -66,5 +66,5 @@ public interface OrderService {
 	 *            查询条件
 	 * @return
 	 */
-	public List<Order> getOrderList(OrderQuery orderQuery);
+    List<Order> getOrderList(OrderQuery orderQuery);
 }

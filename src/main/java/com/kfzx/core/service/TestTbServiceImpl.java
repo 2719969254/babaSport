@@ -10,7 +10,7 @@ import com.kfzx.core.dao.TestTbDao;
 
 /**
  * 
- * @author lx
+ * @author
  *
  */
 @Service
@@ -22,6 +22,8 @@ public class TestTbServiceImpl implements TestTbService{
 	
 	public void addTestTb(TestTb testTb) {
 		testTbDao.addTestTb(testTb);
+		
+		throw new RuntimeException();
 	}
 
 }

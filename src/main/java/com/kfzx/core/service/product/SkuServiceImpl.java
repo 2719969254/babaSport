@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cn.itcast.common.page.Pagination;
+import com.kfzx.core.bean.product.Product;
 import com.kfzx.core.bean.product.Sku;
 import com.kfzx.core.dao.product.SkuDao;
 import com.kfzx.core.query.product.SkuQuery;
 /**
  * 最小销售单元事务层
- * @author lixu
- * @Date [2014-3-27 下午03:31:57]
+@author
  */
 @Service
 @Transactional
@@ -22,6 +22,10 @@ public class SkuServiceImpl implements SkuService {
 
 	@Resource
 	SkuDao skuDao;
+	@Resource
+	ColorService colorService;
+	@Resource
+	ProductService productService;
 
 	/**
 	 * 插入数据库
@@ -37,7 +41,15 @@ public class SkuServiceImpl implements SkuService {
 	 */
 	@Transactional(readOnly = true)
 	public Sku getSkuByKey(Integer id) {
-		return skuDao.getSkuByKey(id);
+		Sku sku = skuDao.getSkuByKey(id);
+		//通过商品ID
+		Product product = productService.getProductByKey(sku.getProductId());
+		
+		sku.setProduct(product);
+		//颜色加载
+		sku.setColor(colorService.getColorByKey(sku.getColorId()));
+		
+		return sku;
 	}
 	
 	@Transactional(readOnly = true)
@@ -76,6 +88,22 @@ public class SkuServiceImpl implements SkuService {
 	
 	@Transactional(readOnly = true)
 	public List<Sku> getSkuList(SkuQuery skuQuery) {
-		return skuDao.getSkuList(skuQuery);
+		List<Sku> skus = skuDao.getSkuList(skuQuery);
+		//颜色加载完结
+		for(Sku sku : skus){
+			sku.setColor(colorService.getColorByKey(sku.getColorId()));
+		}
+		return skus;
+	}
+
+	@Override
+	public List<Sku> getStock(Integer productId) {
+		// TODO Auto-generated method stub
+		List<Sku> skus = skuDao.getStock(productId);
+		//颜色加载完结
+		for(Sku sku : skus){
+			sku.setColor(colorService.getColorByKey(sku.getColorId()));
+		}
+		return skus;
 	}
 }

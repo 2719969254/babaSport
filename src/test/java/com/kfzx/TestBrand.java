@@ -12,7 +12,7 @@ import com.kfzx.core.service.product.BrandService;
 
 /**
  * 测试
- * @author lx
+ * @author
  *
  */
 
